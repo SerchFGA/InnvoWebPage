@@ -13,13 +13,13 @@ const doctors: Doctor[] = [
   {
     id: 'pablo-carvajal',
     name: 'Dr. Pablo Carvajal',
-    duration: '1 hour',
+    duration: '1 hour session',
     image: 'https://placehold.co/100x100.png',
   },
   {
     id: 'alfonso-carvajal',
     name: 'Dr. Alfonso Carvajal',
-    duration: '30 minutes',
+    duration: '30 minute session',
     image: 'https://placehold.co/100x100.png',
   },
 ];
@@ -62,7 +62,7 @@ export function Step1SelectDoctorAndDate({ onNext, data }: Step1Props) {
               mode="single"
               selected={selectedDate}
               onSelect={handleDateSelect}
-              disabled={(date) => date < new Date(new Date().setDate(new Date().getDate() - 1))}
+              disabled={(date) => date < new Date(new Date().setDate(new Date().getDate() - 1)) || date.getDay() === 0}
               className="rounded-md border shadow-sm"
             />
           </div>
