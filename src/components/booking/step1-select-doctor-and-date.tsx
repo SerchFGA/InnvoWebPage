@@ -13,13 +13,13 @@ const doctors: Doctor[] = [
   {
     id: 'pablo-carvajal',
     name: 'Dr. Pablo Carvajal',
-    duration: '1hr',
+    duration: '1 hour',
     image: 'https://placehold.co/100x100.png',
   },
   {
     id: 'alfonso-carvajal',
     name: 'Dr. Alfonso Carvajal',
-    duration: '30min',
+    duration: '30 minutes',
     image: 'https://placehold.co/100x100.png',
   },
 ];
@@ -32,8 +32,22 @@ interface Step1Props {
 export function Step1SelectDoctorAndDate({ onNext, data }: Step1Props) {
   const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(data.doctor);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(data.date ?? new Date());
+  const [hasInteracted, setHasInteracted] = useState(!!data.doctor || !!data.date);
+
+  const handleDoctorSelect = (doctor: Doctor) => {
+    setSelectedDoctor(doctor);
+    setHasInteracted(true);
+  };
+
+  const handleDateSelect = (date: Date | undefined) => {
+    setSelectedDate(date);
+    if (date) {
+        setHasInteracted(true);
+    }
+  };
 
   const canContinue = selectedDoctor && selectedDate;
+  const showValidationError = hasInteracted && !canContinue;
 
   return (
     <Card className="w-full animate-in fade-in-50 duration-500">
@@ -47,7 +61,7 @@ export function Step1SelectDoctorAndDate({ onNext, data }: Step1Props) {
             <Calendar
               mode="single"
               selected={selectedDate}
-              onSelect={setSelectedDate}
+              onSelect={handleDateSelect}
               disabled={(date) => date < new Date(new Date().setDate(new Date().getDate() - 1))}
               className="rounded-md border shadow-sm"
             />
@@ -56,7 +70,7 @@ export function Step1SelectDoctorAndDate({ onNext, data }: Step1Props) {
             {doctors.map((doctor) => (
               <Card
                 key={doctor.id}
-                onClick={() => setSelectedDoctor(doctor)}
+                onClick={() => handleDoctorSelect(doctor)}
                 className={cn(
                   'cursor-pointer transition-all hover:shadow-md',
                   selectedDoctor?.id === doctor.id
@@ -85,7 +99,7 @@ export function Step1SelectDoctorAndDate({ onNext, data }: Step1Props) {
             ))}
           </div>
         </div>
-        <div className="flex justify-end mt-8">
+        <div className="flex flex-col items-end mt-8">
           <Button
             size="lg"
             className="w-full sm:w-auto"
@@ -94,6 +108,13 @@ export function Step1SelectDoctorAndDate({ onNext, data }: Step1Props) {
           >
             Continue
           </Button>
+          <div className="h-6 mt-2 flex items-center">
+            {showValidationError && (
+                <p className="text-sm text-destructive animate-in fade-in-0">
+                    Please select a doctor and a date.
+                </p>
+            )}
+          </div>
         </div>
       </CardContent>
     </Card>
