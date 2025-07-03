@@ -8,16 +8,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import type { BookingData } from '@/app/page';
 
-const generateTimeSlots = (doctorName: string) => {
-  if (doctorName.includes('Pablo')) {
-    return ['09:00', '10:00', '11:00', '12:00', '16:00', '17:00'];
-  }
-  return [
-    '09:00', '09:30', '10:00', '10:30', '11:00', '11:30', '12:00', '12:30',
-    '16:00', '16:30', '17:00', '17:30'
-  ];
-};
-
 interface Step2Props {
   onNext: (data: { time: string }) => void;
   onBack: () => void;
@@ -27,16 +17,16 @@ interface Step2Props {
 export function Step2SelectTime({ onNext, onBack, data }: Step2Props) {
   const [selectedTime, setSelectedTime] = useState<string | null>(data.time);
   
-  if (!data.doctor || !data.date) {
+  if (!data.doctor || !data.date || !data.availableTimes) {
     return (
       <Card className="w-full p-4 text-center">
-        <p className="text-destructive">Missing doctor or date information.</p>
+        <p className="text-destructive">Missing appointment information.</p>
         <Button onClick={onBack} variant="link" className="mt-4">Go Back</Button>
       </Card>
     );
   }
 
-  const timeSlots = generateTimeSlots(data.doctor.name);
+  const timeSlots = data.availableTimes;
 
   return (
     <Card className="w-full animate-in fade-in-50 duration-500">

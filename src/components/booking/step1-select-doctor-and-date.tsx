@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
+import { Loader2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
@@ -27,9 +28,10 @@ const doctors: Doctor[] = [
 interface Step1Props {
   onNext: (data: { doctor: Doctor; date: Date }) => void;
   data: BookingData;
+  isSubmitting: boolean;
 }
 
-export function Step1SelectDoctorAndDate({ onNext, data }: Step1Props) {
+export function Step1SelectDoctorAndDate({ onNext, data, isSubmitting }: Step1Props) {
   const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(data.doctor);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(data.date ?? new Date());
   const [hasInteracted, setHasInteracted] = useState(!!data.doctor || !!data.date);
@@ -104,8 +106,9 @@ export function Step1SelectDoctorAndDate({ onNext, data }: Step1Props) {
             size="lg"
             className="w-full sm:w-auto"
             onClick={() => onNext({ doctor: selectedDoctor!, date: selectedDate! })}
-            disabled={!canContinue}
+            disabled={!canContinue || isSubmitting}
           >
+            {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Continue
           </Button>
           <div className="h-6 mt-2 flex items-center">
