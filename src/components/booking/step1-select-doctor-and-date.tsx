@@ -9,6 +9,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import type { Doctor, BookingData } from '@/app/page';
+import { useTranslation } from '@/contexts/language-context';
 
 const doctors: Doctor[] = [
   {
@@ -34,28 +35,46 @@ interface Step1Props {
 export function Step1SelectDoctorAndDate({ onNext, data, isSubmitting }: Step1Props) {
   const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(data.doctor);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(data.date ?? undefined);
-  const [hasInteracted, setHasInteracted] = useState(!!data.doctor || !!data.date);
+  const [hasInteracted, setHasInteracted] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  const { t, language } = useTranslation();
 
+  const getDoctorDuration = (doctor: Doctor) => {
+    if (language === 'es') {
+      return doctor.id === 'pablo-carvajal' ? 'Sesión de 1 hora' : 'Sesión de 30 minutos';
+    }
+    return doctor.duration;
+  };
+  
   useEffect(() => {
     setIsMounted(true);
-  }, []);
+    if(data.doctor || data.date) {
+      setHasInteracted(true);
+    }
+  }, [data.doctor, data.date]);
 
   useEffect(() => {
     if (isMounted && !data.date) {
-      setSelectedDate(new Date());
+      const today = new Date();
+      if (today.getDay() !== 0) { // Not Sunday
+        setSelectedDate(today);
+      } else { // If today is Sunday, select next day
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        setSelectedDate(tomorrow);
+      }
     }
   }, [isMounted, data.date]);
 
   const handleDoctorSelect = (doctor: Doctor) => {
     setSelectedDoctor(doctor);
-    setHasInteracted(true);
+    if (!hasInteracted) setHasInteracted(true);
   };
 
   const handleDateSelect = (date: Date | undefined) => {
     setSelectedDate(date);
-    if (date) {
-        setHasInteracted(true);
+    if (date && !hasInteracted) {
+      setHasInteracted(true);
     }
   };
 
@@ -63,10 +82,10 @@ export function Step1SelectDoctorAndDate({ onNext, data, isSubmitting }: Step1Pr
   const showValidationError = hasInteracted && !canContinue;
 
   return (
-    <Card className="w-full animate-in fade-in-50 duration-500">
+    <Card className="w-full animate-in fade-in-50 duration-500 shadow-xl rounded-2xl">
       <CardHeader>
-        <CardTitle>Select Doctor and Date</CardTitle>
-        <CardDescription>Choose a specialist and a preferred date for your appointment.</CardDescription>
+        <CardTitle className="text-3xl font-bold">{t('step1Title')}</CardTitle>
+        <CardDescription>{t('step1Description')}</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -83,7 +102,7 @@ export function Step1SelectDoctorAndDate({ onNext, data, isSubmitting }: Step1Pr
                       date.getDay() === 0
               }
               initialFocus
-              className="rounded-md border shadow-sm"
+              className="rounded-xl border shadow-lg"
             />
           </div>
           <div className="space-y-4">
@@ -92,7 +111,7 @@ export function Step1SelectDoctorAndDate({ onNext, data, isSubmitting }: Step1Pr
                 key={doctor.id}
                 onClick={() => handleDoctorSelect(doctor)}
                 className={cn(
-                  'cursor-pointer transition-all hover:shadow-md',
+                  'cursor-pointer transition-all hover:shadow-xl hover:border-primary',
                   selectedDoctor?.id === doctor.id
                     ? 'border-primary ring-2 ring-primary'
                     : 'border-border'
@@ -109,10 +128,10 @@ export function Step1SelectDoctorAndDate({ onNext, data, isSubmitting }: Step1Pr
                   />
                   <div className="flex-grow">
                     <p className="font-semibold text-lg">{doctor.name}</p>
-                    <p className="text-muted-foreground">{doctor.duration}</p>
+                    <p className="text-muted-foreground">{getDoctorDuration(doctor)}</p>
                   </div>
-                  <Button variant={selectedDoctor?.id === doctor.id ? 'default' : 'outline'} className="hidden sm:inline-flex">
-                    Select
+                  <Button variant={selectedDoctor?.id === doctor.id ? 'default' : 'outline'} className="hidden sm:inline-flex rounded-full">
+                    {t('selectButton')}
                   </Button>
                 </CardContent>
               </Card>
@@ -122,17 +141,17 @@ export function Step1SelectDoctorAndDate({ onNext, data, isSubmitting }: Step1Pr
         <div className="flex flex-col items-end mt-8">
           <Button
             size="lg"
-            className="w-full sm:w-auto"
+            className="w-full sm:w-auto btn-gradient rounded-full"
             onClick={() => onNext({ doctor: selectedDoctor!, date: selectedDate! })}
             disabled={!canContinue || isSubmitting}
           >
             {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Continue
+            {t('continueButton')}
           </Button>
           <div className="h-6 mt-2 flex items-center">
             {showValidationError && (
                 <p className="text-sm text-destructive animate-in fade-in-0">
-                    Please select a doctor and a date.
+                    {t('step1ValidationError')}
                 </p>
             )}
           </div>

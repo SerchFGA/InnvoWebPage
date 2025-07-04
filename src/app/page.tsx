@@ -10,6 +10,8 @@ import { Step3ConfirmAppointment } from '@/components/booking/step3-confirm-appo
 import { Step4Success } from '@/components/booking/step4-success';
 import type { doctorSchema, patientDetailsSchema } from '@/lib/schemas';
 import { useToast } from '@/hooks/use-toast';
+import { useTranslation } from '@/contexts/language-context';
+import { ProgressIndicator } from '@/components/layout/progress-indicator';
 
 export type Doctor = z.infer<typeof doctorSchema>;
 export type PatientDetails = z.infer<typeof patientDetailsSchema>;
@@ -30,7 +32,6 @@ const initialBookingData: BookingData = {
   availableTimes: null,
 };
 
-//Webhook for return available times from n8n
 const N8N_AVAILABLE_TIMES_WEBHOOK_URL = 'https://devn8n.pixanai.com/webhook/AvailableTimesInnvo';
 
 export default function Home() {
@@ -38,6 +39,7 @@ export default function Home() {
   const [bookingData, setBookingData] = useState<BookingData>(initialBookingData);
   const [isStep1Submitting, setIsStep1Submitting] = useState(false);
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   const nextStep = () => setStep((prev) => prev + 1);
   const prevStep = () => setStep((prev) => prev - 1);
@@ -65,12 +67,12 @@ export default function Home() {
       const hours = rawHours
         .filter((h: unknown): h is number => typeof h === 'number')
         .sort((a: number, b: number) => a - b);
-
+      
       if (hours.length === 0) {
         toast({
           variant: 'destructive',
-          title: 'No Time Slots',
-          description: 'No available time slots for this doctor on the selected date.',
+          title: t('noTimeSlotsTitle'),
+          description: t('noTimeSlotsDescription'),
         });
         return;
       }
@@ -92,8 +94,8 @@ export default function Home() {
     } catch (error) {
       toast({
         variant: "destructive",
-        title: "Oh no! Something went wrong.",
-        description: "Unable to retrieve available hours. Please try again.",
+        title: t('errorTitle'),
+        description: t('errorDescription'),
       });
     } finally {
       setIsStep1Submitting(false);
@@ -116,23 +118,18 @@ export default function Home() {
   };
 
   return (
-    <main className="flex min-h-screen w-full flex-col items-center justify-center p-4 sm:p-6 md:p-8">
+    <div className="flex flex-col items-center justify-center p-4 sm:p-6 md:p-8">
       <div className="w-full max-w-4xl">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold font-headline text-foreground">
-            MediBook MVP
-          </h1>
-          <p className="text-muted-foreground mt-2">
-            Medical Appointment Scheduler
-          </p>
-        </div>
+        <ProgressIndicator currentStep={step} />
         
-        {step === 1 && <Step1SelectDoctorAndDate onNext={handleStep1Submit} data={bookingData} isSubmitting={isStep1Submitting} />}
-        {step === 2 && <Step2SelectTime onNext={handleStep2Submit} onBack={prevStep} data={bookingData} />}
-        {step === 3 && <Step3ConfirmAppointment onNext={handleStep3Submit} onBack={prevStep} data={bookingData} />}
-        {step === 4 && <Step4Success onReset={handleReset} data={bookingData} />}
+        <div className="mt-8">
+          {step === 1 && <Step1SelectDoctorAndDate onNext={handleStep1Submit} data={bookingData} isSubmitting={isStep1Submitting} />}
+          {step === 2 && <Step2SelectTime onNext={handleStep2Submit} onBack={prevStep} data={bookingData} />}
+          {step === 3 && <Step3ConfirmAppointment onNext={handleStep3Submit} onBack={prevStep} data={bookingData} />}
+          {step === 4 && <Step4Success onReset={handleReset} data={bookingData} />}
+        </div>
 
       </div>
-    </main>
+    </div>
   );
 }

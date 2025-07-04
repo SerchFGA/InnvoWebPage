@@ -1,9 +1,12 @@
 import type {Metadata} from 'next';
 import './globals.css';
-import { Toaster } from "@/components/ui/toaster"
+import { Toaster } from "@/components/ui/toaster";
+import { LanguageProvider } from '@/contexts/language-context';
+import { Header } from '@/components/layout/header';
+import { Footer } from '@/components/layout/footer';
 
 export const metadata: Metadata = {
-  title: 'MediBook MVP',
+  title: 'Agendamiento Innvo',
   description: 'Medical Appointment Scheduler',
 };
 
@@ -13,16 +16,22 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="h-full">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Inter&display=swap" rel="stylesheet"></link>
-      </head>
-      <body className="font-body antialiased h-full" suppressHydrationWarning>
-        {children}
-        <Toaster />
-      </body>
-    </html>
+    <LanguageProvider>
+      <html lang="en" className="h-full">
+        <head>
+          <link rel="preconnect" href="https://fonts.googleapis.com" />
+          <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+          <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet"></link>
+        </head>
+        <body className="font-body antialiased h-full flex flex-col" suppressHydrationWarning>
+          <Header />
+          <main className="flex-grow w-full">
+            {children}
+          </main>
+          <Footer />
+          <Toaster />
+        </body>
+      </html>
+    </LanguageProvider>
   );
 }

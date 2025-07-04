@@ -6,6 +6,7 @@ import type { z } from 'zod';
 import { format } from 'date-fns';
 import { Loader2, ArrowLeft } from 'lucide-react';
 import { useState } from 'react';
+import { es } from 'date-fns/locale';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -14,22 +15,23 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { patientDetailsSchema } from '@/lib/schemas';
 import type { BookingData, PatientDetails } from '@/app/page';
-import { useToast } from "@/hooks/use-toast"
+import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from '@/contexts/language-context';
 
 interface Step3Props {
   onNext: (data: { patientDetails: PatientDetails }) => void;
   onBack: () => void;
   data: BookingData;
 }
-//Webhook to schedule appointment
 const N8N_WEBHOOK_URL = 'https://devn8n.pixanai.com/webhook/ScheduleAppointmentInnvo';
 
 export function Step3ConfirmAppointment({ onNext, onBack, data }: Step3Props) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
+  const { t, language } = useTranslation();
   
   const form = useForm<z.infer<typeof patientDetailsSchema>>({
-    resolver: zodResolver(patientDetailsSchema),
+    resolver: zodResolver(patientDetailsSchema(t)),
     defaultValues: {
       fullName: data.patientDetails?.fullName ?? '',
       phone: data.patientDetails?.phone ?? '+52',
@@ -70,8 +72,8 @@ export function Step3ConfirmAppointment({ onNext, onBack, data }: Step3Props) {
     } catch (error) {
       toast({
         variant: "destructive",
-        title: "Oh no! Something went wrong.",
-        description: error instanceof Error ? error.message : "An unknown error occurred.",
+        title: t('errorTitle'),
+        description: error instanceof Error ? error.message : t('unknownError'),
       })
     } finally {
       setIsSubmitting(false);
@@ -79,15 +81,19 @@ export function Step3ConfirmAppointment({ onNext, onBack, data }: Step3Props) {
   }
 
   if (!data.doctor || !data.date || !data.time) {
-    return <p>Missing appointment information. Please go back.</p>;
+    return <p>{t('missingInfo')}</p>;
   }
 
+  const formattedDate = format(data.date, 'EEEE, d MMMM', {
+    locale: language === 'es' ? es : undefined,
+  });
+
   return (
-    <Card className="w-full animate-in fade-in-50 duration-500">
+    <Card className="w-full animate-in fade-in-50 duration-500 shadow-xl rounded-2xl">
       <CardHeader>
-        <CardTitle>Confirm Your Appointment</CardTitle>
+        <CardTitle className="text-3xl font-bold">{t('step3Title')}</CardTitle>
         <CardDescription>
-          Please provide your details for your appointment with <span className="font-semibold text-primary">{data.doctor.name}</span> on <span className="font-semibold text-primary">{format(data.date, 'EEEE, d MMMM')}</span> at <span className="font-semibold text-primary">{data.time}</span>.
+          {t('step3Description', { doctor: data.doctor.name, date: formattedDate, time: data.time })}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -98,9 +104,9 @@ export function Step3ConfirmAppointment({ onNext, onBack, data }: Step3Props) {
               name="fullName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Full Name</FormLabel>
+                  <FormLabel>{t('fullNameLabel')}</FormLabel>
                   <FormControl>
-                    <Input placeholder="Juan Pérez" {...field} />
+                    <Input placeholder={t('fullNamePlaceholder')} {...field} aria-label={t('fullNameLabel')} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -111,9 +117,9 @@ export function Step3ConfirmAppointment({ onNext, onBack, data }: Step3Props) {
               name="phone"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Phone Number</FormLabel>
+                  <FormLabel>{t('phoneLabel')}</FormLabel>
                   <FormControl>
-                    <Input placeholder="+525512345678" {...field} />
+                    <Input placeholder="+525512345678" {...field} aria-label={t('phoneLabel')} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -124,9 +130,9 @@ export function Step3ConfirmAppointment({ onNext, onBack, data }: Step3Props) {
               name="reason"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Reason for Appointment</FormLabel>
+                  <FormLabel>{t('reasonLabel')}</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g., General Checkup" {...field} />
+                    <Input placeholder={t('reasonPlaceholder')} {...field} aria-label={t('reasonLabel')} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -137,22 +143,22 @@ export function Step3ConfirmAppointment({ onNext, onBack, data }: Step3Props) {
               name="notes"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Notes (Optional)</FormLabel>
+                  <FormLabel>{t('notesLabel')}</FormLabel>
                   <FormControl>
-                    <Textarea placeholder="Any additional information for the doctor..." {...field} />
+                    <Textarea placeholder={t('notesPlaceholder')} {...field} aria-label={t('notesLabel')} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
             <div className="flex justify-between items-center mt-8">
-              <Button variant="outline" onClick={onBack} type="button" disabled={isSubmitting} className="w-full sm:w-auto">
+              <Button variant="outline" onClick={onBack} type="button" disabled={isSubmitting} className="w-full sm:w-auto rounded-full">
                 <ArrowLeft className="mr-2 h-4 w-4" />
-                Back
+                {t('backButton')}
               </Button>
-              <Button size="lg" type="submit" disabled={isSubmitting} className="w-full sm:w-auto">
+              <Button size="lg" type="submit" disabled={isSubmitting} className="w-full sm:w-auto btn-gradient rounded-full">
                 {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Schedule Appointment
+                {t('scheduleButton')}
               </Button>
             </div>
           </form>
