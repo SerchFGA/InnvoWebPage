@@ -18,12 +18,6 @@ const doctors: Doctor[] = [
     duration: '1 hour session',
     image: '/assets/DrPabloCarvajal.png',
   },
-  {
-    id: 'alfonso-carvajal',
-    name: 'Dr. Alfonso Carvajal',
-    duration: '30 minute session',
-    image: 'https://placehold.co/100x100.png',
-  },
 ];
 
 interface Step1Props {
