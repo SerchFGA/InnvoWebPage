@@ -44,10 +44,10 @@ export default function Home() {
   const handleStep1Submit = async (data: { doctor: Doctor; date: Date }) => {
     setIsStep1Submitting(true);
     try {
-      const payload = {
+      const payload = [{
         doctor: data.doctor.name,
         Fecha: format(data.date, 'yyyy-MM-dd'),
-      };
+      }];
 
       const response = await fetch(N8N_AVAILABLE_TIMES_WEBHOOK_URL, {
         method: 'POST',
@@ -60,7 +60,7 @@ export default function Home() {
       }
 
       const responseData = await response.json();
-      const rawHours = responseData?.response?.body?.['availableHours'] || [];
+      const rawHours = responseData?.[0]?.response?.body?.['availableHours'] || [];
       const hours = rawHours
         .filter((h: unknown): h is number => typeof h === 'number')
         .sort((a: number, b: number) => a - b);
