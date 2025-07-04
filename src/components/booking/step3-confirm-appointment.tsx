@@ -21,8 +21,8 @@ interface Step3Props {
   onBack: () => void;
   data: BookingData;
 }
-
-const N8N_WEBHOOK_URL = 'https://devn8n.pixanai.com/webhook-test/PodactivaExternalCalendar';
+//Webhook to schedule appointment
+const N8N_WEBHOOK_URL = 'https://devn8n.pixanai.com/webhook/ScheduleAppointmentInnvo';
 
 export function Step3ConfirmAppointment({ onNext, onBack, data }: Step3Props) {
   const [isSubmitting, setIsSubmitting] = useState(false);

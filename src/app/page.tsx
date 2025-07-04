@@ -30,7 +30,8 @@ const initialBookingData: BookingData = {
   availableTimes: null,
 };
 
-const N8N_AVAILABLE_TIMES_WEBHOOK_URL = 'https://devn8n.pixanai.com/webhook-test/2b5931c9-e16b-4f37-a18f-da1cfda5ec10';
+//Webhook for return available times from n8n
+const N8N_AVAILABLE_TIMES_WEBHOOK_URL = 'https://devn8n.pixanai.com/webhook/AvailableTimesInnvo';
 
 export default function Home() {
   const [step, setStep] = useState(1);
