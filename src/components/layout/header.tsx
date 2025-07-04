@@ -17,7 +17,7 @@ export function Header() {
     <header className="bg-white/80 backdrop-blur-sm sticky top-0 z-50 shadow-sm">
       <div className="container mx-auto flex items-center justify-between p-4">
         <Link href="/" className="flex items-center gap-3">
-          <Image src="/LogoInnvo.png" alt="Innvo Logo" width={40} height={40} />
+          <Image src="/assets/LogoInnvo.png" alt="Innvo Logo" width={40} height={40} />
           <span className="font-bold text-xl text-foreground">Agendamiento Innvo</span>
         </Link>
         <div className="flex items-center space-x-2">
