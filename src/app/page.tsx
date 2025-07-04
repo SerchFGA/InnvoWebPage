@@ -44,10 +44,10 @@ export default function Home() {
   const handleStep1Submit = async (data: { doctor: Doctor; date: Date }) => {
     setIsStep1Submitting(true);
     try {
-      const payload = [{
+      const payload = {
         doctor: data.doctor.name,
         Fecha: format(data.date, 'yyyy-MM-dd'),
-      }];
+      };
 
       const response = await fetch(N8N_AVAILABLE_TIMES_WEBHOOK_URL, {
         method: 'POST',
