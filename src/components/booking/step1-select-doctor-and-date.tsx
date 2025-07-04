@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Loader2 } from 'lucide-react';
 
@@ -33,8 +33,16 @@ interface Step1Props {
 
 export function Step1SelectDoctorAndDate({ onNext, data, isSubmitting }: Step1Props) {
   const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(data.doctor);
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(data.date ?? new Date());
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(data.date);
   const [hasInteracted, setHasInteracted] = useState(!!data.doctor || !!data.date);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+    if (!data.date) {
+      setSelectedDate(new Date());
+    }
+  }, [data.date]);
 
   const handleDoctorSelect = (doctor: Doctor) => {
     setSelectedDoctor(doctor);
@@ -64,7 +72,14 @@ export function Step1SelectDoctorAndDate({ onNext, data, isSubmitting }: Step1Pr
               mode="single"
               selected={selectedDate}
               onSelect={handleDateSelect}
-              disabled={(date) => date < new Date(new Date().setDate(new Date().getDate() - 1)) || date.getDay() === 0}
+              disabled={
+                !isMounted
+                  ? () => true
+                  : (date) =>
+                      date < new Date(new Date().setDate(new Date().getDate() - 1)) ||
+                      date.getDay() === 0
+              }
+              initialFocus
               className="rounded-md border shadow-sm"
             />
           </div>
