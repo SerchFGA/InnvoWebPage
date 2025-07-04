@@ -33,16 +33,19 @@ interface Step1Props {
 
 export function Step1SelectDoctorAndDate({ onNext, data, isSubmitting }: Step1Props) {
   const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(data.doctor);
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(data.date);
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(data.date ?? undefined);
   const [hasInteracted, setHasInteracted] = useState(!!data.doctor || !!data.date);
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
-    if (!data.date) {
+  }, []);
+
+  useEffect(() => {
+    if (isMounted && !data.date) {
       setSelectedDate(new Date());
     }
-  }, [data.date]);
+  }, [isMounted, data.date]);
 
   const handleDoctorSelect = (doctor: Doctor) => {
     setSelectedDoctor(doctor);
