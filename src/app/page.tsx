@@ -60,7 +60,7 @@ export default function Home() {
       }
 
       const responseData = await response.json();
-      const rawHours = responseData?.[0]?.response?.body?.['availableHours '] || [];
+      const rawHours = responseData?.[0]?.response?.body?.['availableHours'] || [];
       const hours = rawHours
         .filter((h: unknown): h is number => typeof h === 'number')
         .sort((a: number, b: number) => a - b);
