@@ -16,7 +16,7 @@ const doctors: Doctor[] = [
     id: 'pablo-carvajal',
     name: 'Dr. Pablo Carvajal',
     duration: '1 hour session',
-    image: 'https://placehold.co/100x100.png',
+    image: '/assets/DrPabloCarvajal.png',
   },
   {
     id: 'alfonso-carvajal',
