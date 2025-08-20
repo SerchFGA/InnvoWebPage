@@ -34,7 +34,7 @@ export function Step3ConfirmAppointment({ onNext, onBack, data }: Step3Props) {
     resolver: zodResolver(patientDetailsSchema(t)),
     defaultValues: {
       fullName: data.patientDetails?.fullName ?? '',
-      phone: data.patientDetails?.phone ?? '+52',
+      phone: data.patientDetails?.phone ?? '',
       reason: data.patientDetails?.reason ?? '',
       notes: data.patientDetails?.notes ?? '',
     },
@@ -43,12 +43,11 @@ export function Step3ConfirmAppointment({ onNext, onBack, data }: Step3Props) {
   async function onSubmit(values: z.infer<typeof patientDetailsSchema>) {
     setIsSubmitting(true);
     
-    // Convert time from "1:30 PM" format back to a 24-hour string "HH:mm"
     let timeString = '';
     if (data.time) {
       try {
         const timeAsDate = parse(data.time, 'p', new Date());
-        timeString = format(timeAsDate, 'HH:mm'); // e.g., "09:30" or "13:00"
+        timeString = format(timeAsDate, 'HH:mm');
       } catch (e) {
         console.error("Could not parse time:", data.time);
       }
@@ -61,7 +60,7 @@ export function Step3ConfirmAppointment({ onNext, onBack, data }: Step3Props) {
       Hora: timeString,
       duration: data.doctor?.duration,
       full_name: values.fullName,
-      phone: values.phone,
+      phone: `+52${values.phone}`,
       reason: values.reason,
       notes: values.notes,
     };
@@ -80,7 +79,7 @@ export function Step3ConfirmAppointment({ onNext, onBack, data }: Step3Props) {
         throw new Error(errorData.message || 'Failed to schedule appointment. Please try again.');
       }
       
-      onNext({ patientDetails: values });
+      onNext({ patientDetails: { ...values, phone: `+52${values.phone}` } });
 
     } catch (error) {
       toast({
@@ -132,7 +131,24 @@ export function Step3ConfirmAppointment({ onNext, onBack, data }: Step3Props) {
                 <FormItem>
                   <FormLabel>{t('phoneLabel')}</FormLabel>
                   <FormControl>
-                    <Input placeholder="+525512345678" {...field} aria-label={t('phoneLabel')} />
+                    <div className="flex items-center">
+                      <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-input bg-secondary text-muted-foreground text-sm">
+                        +52
+                      </span>
+                      <Input
+                        type="tel"
+                        placeholder="5512345678"
+                        {...field}
+                        onChange={(e) => {
+                          const { value } = e.target;
+                          // Allow only digits and limit to 10
+                          const numericValue = value.replace(/\D/g, '').slice(0, 10);
+                          field.onChange(numericValue);
+                        }}
+                        className="rounded-l-none"
+                        aria-label={t('phoneLabel')}
+                      />
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>

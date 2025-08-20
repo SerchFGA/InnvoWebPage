@@ -48,7 +48,7 @@ export const translations = {
 
     // Form Validation
     fullNameMin: 'Full name must be at least 3 characters.',
-    phoneRegex: 'Phone number must be 10 digits and start with +52.',
+    phoneRegex: 'Please enter a valid 10-digit phone number.',
     reasonRequired: 'Reason for appointment is required.',
     
     // Footer
@@ -107,7 +107,7 @@ export const translations = {
     
     // Form Validation
     fullNameMin: 'El nombre completo debe tener al menos 3 caracteres.',
-    phoneRegex: 'El número de teléfono debe tener 10 dígitos y comenzar con +52.',
+    phoneRegex: 'Por favor, ingresa un número de teléfono válido de 10 dígitos.',
     reasonRequired: 'El motivo de la cita es obligatorio.',
 
     // Footer

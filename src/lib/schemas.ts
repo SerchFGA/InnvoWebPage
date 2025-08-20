@@ -13,8 +13,8 @@ type Translator = (key: TranslationKey) => string;
 
 export const patientDetailsSchema = (t?: Translator) => z.object({
   fullName: z.string().min(3, { message: t ? t('fullNameMin') : "Full name must be at least 3 characters." }),
-  phone: z.string().regex(/^\+52\d{10}$/, {
-    message: t ? t('phoneRegex') : "Phone number must be 10 digits and start with +52.",
+  phone: z.string().regex(/^\d{10}$/, {
+    message: t ? t('phoneRegex') : "Please enter a valid 10-digit phone number.",
   }),
   reason: z.string().min(1, { message: t ? t('reasonRequired') : "Reason for appointment is required." }),
   notes: z.string().optional(),
