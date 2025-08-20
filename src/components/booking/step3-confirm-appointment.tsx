@@ -3,7 +3,7 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import type { z } from 'zod';
-import { format } from 'date-fns';
+import { format, parse } from 'date-fns';
 import { Loader2, ArrowLeft } from 'lucide-react';
 import { useState } from 'react';
 import { es } from 'date-fns/locale';
@@ -43,16 +43,22 @@ export function Step3ConfirmAppointment({ onNext, onBack, data }: Step3Props) {
   async function onSubmit(values: z.infer<typeof patientDetailsSchema>) {
     setIsSubmitting(true);
     
-    // Extract the hour number from the time string (e.g., "10:00 AM" -> 10)
-    const timeAsDate = new Date(`1970-01-01T${data.time?.split(' ')[0]}:00`);
-    const hour = data.time ? timeAsDate.getHours() : 0;
+    // Convert time from "1:00 PM" format back to a 24-hour number
+    let hour = 0;
+    if (data.time) {
+      try {
+        const timeAsDate = parse(data.time, 'p', new Date());
+        hour = timeAsDate.getHours();
+      } catch (e) {
+        console.error("Could not parse time:", data.time);
+      }
+    }
 
     const payload = {
       doctor_id: data.doctor?.id,
       doctor: data.doctor?.name,
       Fecha: data.date ? format(data.date, 'yyyy-MM-dd') : '',
       Hora: hour,
-      // Patient details below are for the webhook, but might not be in the required final format
       full_name: values.fullName,
       phone: values.phone,
       reason: values.reason,

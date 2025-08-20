@@ -64,10 +64,14 @@ export default function Home() {
       }
 
       const responseData = await response.json();
-      const rawHours = responseData[0]?.hours || [];
+      
+      // Adjusted based on the N8N screenshot
+      const rawHours = responseData?.response?.body?.hours || [];
+
+      // Ensure hours are strings and sort them
       const hours = rawHours
-        .filter((h: unknown): h is number => typeof h === 'number')
-        .sort((a: number, b: number) => a - b);
+        .filter((h: unknown): h is string => typeof h === 'string')
+        .sort((a: string, b: string) => a.localeCompare(b));
       
       if (hours.length === 0) {
         toast({
@@ -78,10 +82,12 @@ export default function Home() {
         return;
       }
       
-      const availableTimes = hours.map((hour) => {
+      // Format hours from "13:00" to "1:00 PM"
+      const availableTimes = hours.map((hourString) => {
+        const [hour, minute] = hourString.split(':');
         const d = new Date();
-        d.setHours(hour, 0, 0, 0);
-        return format(d, 'p');
+        d.setHours(parseInt(hour, 10), parseInt(minute, 10), 0, 0);
+        return format(d, 'p'); // 'p' formats to locale-specific time like "1:00 PM"
       });
       
       setBookingData((prev) => ({ 
