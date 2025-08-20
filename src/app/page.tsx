@@ -47,11 +47,11 @@ export default function Home() {
   const handleStep1Submit = async (data: { doctor: Doctor; date: Date }) => {
     setIsStep1Submitting(true);
     try {
-      const payload = [{
+      const payload = {
         doctor: data.doctor.name,
         doctor_id: data.doctor.id,
         Fecha: format(data.date, 'yyyy-MM-dd'),
-      }];
+      };
 
       const response = await fetch(N8N_AVAILABLE_TIMES_WEBHOOK_URL, {
         method: 'POST',
@@ -65,8 +65,7 @@ export default function Home() {
 
       const responseData = await response.json();
       
-      // Adjusted based on the N8N screenshot
-      const rawHours = responseData?.response?.body?.hours || [];
+      const rawHours = responseData?.hours || [];
 
       // Ensure hours are strings and sort them
       const hours = rawHours
