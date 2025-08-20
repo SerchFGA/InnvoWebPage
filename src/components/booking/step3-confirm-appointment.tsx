@@ -43,12 +43,12 @@ export function Step3ConfirmAppointment({ onNext, onBack, data }: Step3Props) {
   async function onSubmit(values: z.infer<typeof patientDetailsSchema>) {
     setIsSubmitting(true);
     
-    // Convert time from "1:00 PM" format back to a 24-hour number
-    let hour = 0;
+    // Convert time from "1:30 PM" format back to a 24-hour string "HH:mm"
+    let timeString = '';
     if (data.time) {
       try {
         const timeAsDate = parse(data.time, 'p', new Date());
-        hour = timeAsDate.getHours();
+        timeString = format(timeAsDate, 'HH:mm'); // e.g., "09:30" or "13:00"
       } catch (e) {
         console.error("Could not parse time:", data.time);
       }
@@ -58,7 +58,8 @@ export function Step3ConfirmAppointment({ onNext, onBack, data }: Step3Props) {
       doctor_id: data.doctor?.id,
       doctor: data.doctor?.name,
       Fecha: data.date ? format(data.date, 'yyyy-MM-dd') : '',
-      Hora: hour,
+      Hora: timeString,
+      duration: data.doctor?.duration,
       full_name: values.fullName,
       phone: values.phone,
       reason: values.reason,
