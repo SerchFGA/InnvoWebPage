@@ -2,8 +2,9 @@ import { z } from 'zod';
 import type { TranslationKey } from './i18n';
 
 export const doctorSchema = z.object({
-  id: z.string(),
+  id: z.number(),
   name: z.string(),
+  services: z.string(),
   duration: z.string(),
   image: z.string(),
 });

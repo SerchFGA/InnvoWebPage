@@ -13,10 +13,46 @@ import { useTranslation } from '@/contexts/language-context';
 
 const doctors: Doctor[] = [
   {
-    id: 'pablo-carvajal',
+    id: 1,
     name: 'Dr. Pablo Carvajal',
-    duration: '1 hour session',
+    services: 'HOMEOPATIA, OSTEOPATIA',
+    duration: '60 min session',
     image: '/assets/DrPabloCarvajal.png',
+  },
+  {
+    id: 2,
+    name: 'Dr. ALFONSO CARVAJAL',
+    services: 'HOMEOPATIA, TRAUMATOLOGIA, OSTEOPATIA',
+    duration: '30 min session',
+    image: 'https://placehold.co/80x80.png',
+  },
+  {
+    id: 3,
+    name: 'REVISIONES PODOACTIVA',
+    services: 'REVISIONES DE PLANTILLAS',
+    duration: '30 min session',
+    image: 'https://placehold.co/80x80.png',
+  },
+  {
+    id: 4,
+    name: 'ESTUDIO BIOMECANICO',
+    services: 'ESTUDIO DE LA PISADA',
+    duration: '60 min session',
+    image: 'https://placehold.co/80x80.png',
+  },
+  {
+    id: 5,
+    name: 'QUIROPODIA',
+    services: 'CUIDADOS DEL PIE',
+    duration: '30 min session',
+    image: 'https://placehold.co/80x80.png',
+  },
+  {
+    id: 6,
+    name: 'FISIOTERAPIA 01',
+    services: 'REHABILITACION FISICA',
+    duration: '60 min session',
+    image: 'https://placehold.co/80x80.png',
   },
 ];
 
@@ -35,7 +71,8 @@ export function Step1SelectDoctorAndDate({ onNext, data, isSubmitting }: Step1Pr
 
   const getDoctorDuration = (doctor: Doctor) => {
     if (language === 'es') {
-      return doctor.id === 'pablo-carvajal' ? 'Sesión de 1 hora' : 'Sesión de 30 minutos';
+      if (doctor.duration.includes('60')) return 'Sesión de 60 min';
+      if (doctor.duration.includes('30')) return 'Sesión de 30 min';
     }
     return doctor.duration;
   };
@@ -122,7 +159,8 @@ export function Step1SelectDoctorAndDate({ onNext, data, isSubmitting }: Step1Pr
                   />
                   <div className="flex-grow">
                     <p className="font-semibold text-lg">{doctor.name}</p>
-                    <p className="text-muted-foreground">{getDoctorDuration(doctor)}</p>
+                    <p className="text-sm text-muted-foreground">{doctor.services}</p>
+                    <p className="text-sm text-muted-foreground mt-1">{getDoctorDuration(doctor)}</p>
                   </div>
                   <Button variant={selectedDoctor?.id === doctor.id ? 'default' : 'outline'} className="hidden sm:inline-flex rounded-full">
                     {t('selectButton')}

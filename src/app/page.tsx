@@ -49,6 +49,7 @@ export default function Home() {
     try {
       const payload = [{
         doctor: data.doctor.name,
+        doctor_id: data.doctor.id,
         Fecha: format(data.date, 'yyyy-MM-dd'),
       }];
 
@@ -63,7 +64,7 @@ export default function Home() {
       }
 
       const responseData = await response.json();
-      const rawHours = responseData?.availableHours || [];
+      const rawHours = responseData[0]?.hours || [];
       const hours = rawHours
         .filter((h: unknown): h is number => typeof h === 'number')
         .sort((a: number, b: number) => a - b);

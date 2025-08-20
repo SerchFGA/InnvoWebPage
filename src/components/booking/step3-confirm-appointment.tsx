@@ -42,11 +42,17 @@ export function Step3ConfirmAppointment({ onNext, onBack, data }: Step3Props) {
 
   async function onSubmit(values: z.infer<typeof patientDetailsSchema>) {
     setIsSubmitting(true);
+    
+    // Extract the hour number from the time string (e.g., "10:00 AM" -> 10)
+    const timeAsDate = new Date(`1970-01-01T${data.time?.split(' ')[0]}:00`);
+    const hour = data.time ? timeAsDate.getHours() : 0;
+
     const payload = {
+      doctor_id: data.doctor?.id,
       doctor: data.doctor?.name,
-      duration: data.doctor?.duration,
-      date: data.date ? format(data.date, 'yyyy-MM-dd') : '',
-      time: data.time,
+      Fecha: data.date ? format(data.date, 'yyyy-MM-dd') : '',
+      Hora: hour,
+      // Patient details below are for the webhook, but might not be in the required final format
       full_name: values.fullName,
       phone: values.phone,
       reason: values.reason,
