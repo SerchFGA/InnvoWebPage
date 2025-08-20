@@ -113,7 +113,7 @@ export function Step1SelectDoctorAndDate({ onNext, data, isSubmitting }: Step1Pr
   const showValidationError = hasInteracted && !canContinue;
 
   return (
-    <Card className="w-full animate-in fade-in-50 duration-500 shadow-xl rounded-2xl">
+    <Card className="w-full animate-in fade-in-50 duration-500 shadow-xl rounded-2xl relative pb-24">
       <CardHeader>
         <CardTitle className="text-3xl font-bold">{t('step1Title')}</CardTitle>
         <CardDescription>{t('step1Description')}</CardDescription>
@@ -134,13 +134,13 @@ export function Step1SelectDoctorAndDate({ onNext, data, isSubmitting }: Step1Pr
                       date.getDay() === 0
               }
               initialFocus
-              className="rounded-xl border shadow-lg"
+              className="rounded-xl border shadow-lg p-4"
             />
           </div>
 
           {/* Right Column: Doctor List */}
           <div className="w-full lg:w-1/2">
-            <div className="space-y-4 max-h-[600px] overflow-y-auto pr-4">
+            <div className="space-y-2 max-h-[450px] overflow-y-auto pr-2 -mr-4">
               {doctors.map((doctor) => (
                 <Card
                   key={doctor.id}
@@ -152,21 +152,21 @@ export function Step1SelectDoctorAndDate({ onNext, data, isSubmitting }: Step1Pr
                       : 'border-border'
                   )}
                 >
-                  <CardContent className="p-4 flex items-center gap-4">
+                  <CardContent className="p-3 flex items-center gap-4">
                     <Image
                       src={doctor.image}
                       alt={doctor.name}
-                      width={80}
-                      height={80}
+                      width={64}
+                      height={64}
                       className="rounded-full"
                       data-ai-hint="doctor portrait"
                     />
                     <div className="flex-grow">
-                      <p className="font-semibold text-lg">{doctor.name}</p>
-                      <p className="text-sm text-muted-foreground">{doctor.services}</p>
-                      <p className="text-sm text-muted-foreground mt-1">{getDoctorDuration(doctor)}</p>
+                      <p className="font-semibold text-md">{doctor.name}</p>
+                      <p className="text-xs text-muted-foreground">{doctor.services}</p>
+                      <p className="text-xs text-muted-foreground mt-1">{getDoctorDuration(doctor)}</p>
                     </div>
-                    <Button variant={selectedDoctor?.id === doctor.id ? 'default' : 'outline'} className="hidden sm:inline-flex rounded-full">
+                    <Button variant={selectedDoctor?.id === doctor.id ? 'default' : 'outline'} size="sm" className="hidden sm:inline-flex rounded-full">
                       {t('selectButton')}
                     </Button>
                   </CardContent>
@@ -177,7 +177,7 @@ export function Step1SelectDoctorAndDate({ onNext, data, isSubmitting }: Step1Pr
         </div>
 
         {/* Continue Button Section */}
-        <div className="flex flex-col items-end mt-8">
+        <div className="absolute bottom-6 right-6 flex flex-col items-end">
           <Button
             size="lg"
             className="w-full sm:w-auto btn-gradient rounded-full"
