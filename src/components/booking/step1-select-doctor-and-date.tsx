@@ -119,8 +119,9 @@ export function Step1SelectDoctorAndDate({ onNext, data, isSubmitting }: Step1Pr
         <CardDescription>{t('step1Description')}</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div className="flex justify-center items-center">
+        <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
+          {/* Left Column: Calendar */}
+          <div className="w-full lg:w-1/2 flex justify-center items-start">
             <Calendar
               mode="single"
               selected={selectedDate}
@@ -136,40 +137,46 @@ export function Step1SelectDoctorAndDate({ onNext, data, isSubmitting }: Step1Pr
               className="rounded-xl border shadow-lg"
             />
           </div>
-          <div className="space-y-4">
-            {doctors.map((doctor) => (
-              <Card
-                key={doctor.id}
-                onClick={() => handleDoctorSelect(doctor)}
-                className={cn(
-                  'cursor-pointer transition-all hover:shadow-xl hover:border-primary',
-                  selectedDoctor?.id === doctor.id
-                    ? 'border-primary ring-2 ring-primary'
-                    : 'border-border'
-                )}
-              >
-                <CardContent className="p-4 flex items-center gap-4">
-                  <Image
-                    src={doctor.image}
-                    alt={doctor.name}
-                    width={80}
-                    height={80}
-                    className="rounded-full"
-                    data-ai-hint="doctor portrait"
-                  />
-                  <div className="flex-grow">
-                    <p className="font-semibold text-lg">{doctor.name}</p>
-                    <p className="text-sm text-muted-foreground">{doctor.services}</p>
-                    <p className="text-sm text-muted-foreground mt-1">{getDoctorDuration(doctor)}</p>
-                  </div>
-                  <Button variant={selectedDoctor?.id === doctor.id ? 'default' : 'outline'} className="hidden sm:inline-flex rounded-full">
-                    {t('selectButton')}
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
+
+          {/* Right Column: Doctor List */}
+          <div className="w-full lg:w-1/2">
+            <div className="space-y-4 max-h-[600px] overflow-y-auto pr-4">
+              {doctors.map((doctor) => (
+                <Card
+                  key={doctor.id}
+                  onClick={() => handleDoctorSelect(doctor)}
+                  className={cn(
+                    'cursor-pointer transition-all hover:shadow-xl hover:border-primary',
+                    selectedDoctor?.id === doctor.id
+                      ? 'border-primary ring-2 ring-primary'
+                      : 'border-border'
+                  )}
+                >
+                  <CardContent className="p-4 flex items-center gap-4">
+                    <Image
+                      src={doctor.image}
+                      alt={doctor.name}
+                      width={80}
+                      height={80}
+                      className="rounded-full"
+                      data-ai-hint="doctor portrait"
+                    />
+                    <div className="flex-grow">
+                      <p className="font-semibold text-lg">{doctor.name}</p>
+                      <p className="text-sm text-muted-foreground">{doctor.services}</p>
+                      <p className="text-sm text-muted-foreground mt-1">{getDoctorDuration(doctor)}</p>
+                    </div>
+                    <Button variant={selectedDoctor?.id === doctor.id ? 'default' : 'outline'} className="hidden sm:inline-flex rounded-full">
+                      {t('selectButton')}
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </div>
         </div>
+
+        {/* Continue Button Section */}
         <div className="flex flex-col items-end mt-8">
           <Button
             size="lg"
