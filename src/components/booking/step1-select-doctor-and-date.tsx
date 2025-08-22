@@ -20,13 +20,6 @@ const doctors: Doctor[] = [
     image: '/assets/DrPabloCarvajal.png',
   },
   {
-    id: 2,
-    name: 'Dr. ALFONSO CARVAJAL',
-    services: 'HOMEOPATIA, TRAUMATOLOGIA, OSTEOPATIA',
-    duration: '30 min session',
-    image: 'https://placehold.co/80x80.png',
-  },
-  {
     id: 3,
     name: 'REVISIONES PODOACTIVA',
     services: 'REVISIONES DE PLANTILLAS',
@@ -66,7 +59,6 @@ export function Step1SelectDoctorAndDate({ onNext, data, isSubmitting }: Step1Pr
   const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(data.doctor);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(data.date ?? undefined);
   const [hasInteracted, setHasInteracted] = useState(false);
-  const [isMounted, setIsMounted] = useState(false);
   const { t, language } = useTranslation();
 
   const getDoctorDuration = (doctor: Doctor) => {
@@ -78,14 +70,13 @@ export function Step1SelectDoctorAndDate({ onNext, data, isSubmitting }: Step1Pr
   };
   
   useEffect(() => {
-    setIsMounted(true);
     if(data.doctor || data.date) {
       setHasInteracted(true);
     }
   }, [data.doctor, data.date]);
 
   useEffect(() => {
-    if (isMounted && !data.date) {
+    if (!data.date) {
       const today = new Date();
       if (today.getDay() !== 0) { // Not Sunday
         setSelectedDate(today);
@@ -95,7 +86,8 @@ export function Step1SelectDoctorAndDate({ onNext, data, isSubmitting }: Step1Pr
         setSelectedDate(tomorrow);
       }
     }
-  }, [isMounted, data.date]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleDoctorSelect = (doctor: Doctor) => {
     setSelectedDoctor(doctor);
@@ -127,9 +119,7 @@ export function Step1SelectDoctorAndDate({ onNext, data, isSubmitting }: Step1Pr
               selected={selectedDate}
               onSelect={handleDateSelect}
               disabled={
-                !isMounted
-                  ? () => true
-                  : (date) =>
+                (date) =>
                       date < new Date(new Date().setDate(new Date().getDate() - 1)) ||
                       date.getDay() === 0
               }
