@@ -20,7 +20,7 @@ const doctors: Doctor[] = [
     image: '/assets/DrPabloCarvajal.png',
   },
   {
-    id: 23,
+    id: 26,
     name: 'Dr. Pablo Carvajal',
     services: 'HOMEOPATIA, OSTEOPATIA',
     duration: '30 min session',
