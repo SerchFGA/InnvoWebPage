@@ -13,6 +13,13 @@ import { useTranslation } from '@/contexts/language-context';
 
 const doctors: Doctor[] = [
   {
+    id: 2,
+    name: 'Dr. Alfonso Carvajal',
+    services: 'HOMEOPATIA, TRAUMATOLOGIA, OSTEOPATIA',
+    duration: '30 min session',
+    image: 'https://placehold.co/80x80.png',
+  },
+  {
     id: 1,
     name: 'Dr. Pablo Carvajal',
     services: 'HOMEOPATIA, OSTEOPATIA',
@@ -25,13 +32,6 @@ const doctors: Doctor[] = [
     services: 'HOMEOPATIA, OSTEOPATIA',
     duration: '30 min session',
     image: '/assets/DrPabloCarvajal.png',
-  },
-  {
-    id: 2,
-    name: 'Dr. Alfonso Carvajal',
-    services: 'HOMEOPATIA, TRAUMATOLOGIA, OSTEOPATIA',
-    duration: '30 min session',
-    image: 'https://placehold.co/80x80.png',
   },
   {
     id: 3,
