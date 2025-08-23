@@ -20,6 +20,13 @@ const doctors: Doctor[] = [
     image: '/assets/DrPabloCarvajal.png',
   },
   {
+    id: 23,
+    name: 'Dr. Pablo Carvajal',
+    services: 'HOMEOPATIA, OSTEOPATIA',
+    duration: '30 min session',
+    image: '/assets/DrPabloCarvajal.png',
+  },
+  {
     id: 3,
     name: 'REVISIONES PODOACTIVA',
     services: 'REVISIONES DE PLANTILLAS',
@@ -76,7 +83,7 @@ export function Step1SelectDoctorAndDate({ onNext, data, isSubmitting }: Step1Pr
   }, [data.doctor, data.date]);
 
   useEffect(() => {
-    if (!data.date) {
+    if (!selectedDate) {
       const today = new Date();
       if (today.getDay() !== 0) { // Not Sunday
         setSelectedDate(today);
@@ -86,8 +93,7 @@ export function Step1SelectDoctorAndDate({ onNext, data, isSubmitting }: Step1Pr
         setSelectedDate(tomorrow);
       }
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [selectedDate]);
 
   const handleDoctorSelect = (doctor: Doctor) => {
     setSelectedDoctor(doctor);
@@ -113,7 +119,7 @@ export function Step1SelectDoctorAndDate({ onNext, data, isSubmitting }: Step1Pr
       <CardContent>
         <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
           {/* Left Column: Calendar */}
-          <div className="w-full lg:w-1/2 flex justify-center items-start">
+          <div className="w-full lg:w-1/2 flex justify-center items-start pt-4">
             <Calendar
               mode="single"
               selected={selectedDate}
@@ -133,7 +139,7 @@ export function Step1SelectDoctorAndDate({ onNext, data, isSubmitting }: Step1Pr
             <div className="space-y-2 max-h-[450px] overflow-y-auto pr-2 -mr-4">
               {doctors.map((doctor) => (
                 <Card
-                  key={doctor.id}
+                  key={`${doctor.id}-${doctor.duration}`}
                   onClick={() => handleDoctorSelect(doctor)}
                   className={cn(
                     'cursor-pointer transition-all hover:shadow-xl hover:border-primary',
