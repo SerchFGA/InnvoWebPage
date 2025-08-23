@@ -102,7 +102,7 @@ export function Step1SelectDoctorAndDate({ onNext, data, isSubmitting }: Step1Pr
     }
   // The empty dependency array is crucial here to ensure this only runs once on the client
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [isClient]);
 
   const handleDoctorSelect = (doctor: Doctor) => {
     setSelectedDoctor(doctor);
