@@ -95,7 +95,8 @@ export function Step1SelectDoctorAndDate({ onNext, data, isSubmitting }: Step1Pr
         setSelectedDate(today);
       }
     }
-  }, [selectedDate]);
+  // The empty dependency array is crucial here to ensure this only runs once on the client
+  }, []);
 
   const handleDoctorSelect = (doctor: Doctor) => {
     setSelectedDoctor(doctor);
