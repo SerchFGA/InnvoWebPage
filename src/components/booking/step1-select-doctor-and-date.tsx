@@ -147,7 +147,7 @@ export function Step1SelectDoctorAndDate({ onNext, data, isSubmitting }: Step1Pr
                   onClick={() => handleDoctorSelect(doctor)}
                   className={cn(
                     'cursor-pointer transition-all hover:shadow-xl hover:border-primary',
-                    selectedDoctor?.id === doctor.id
+                    selectedDoctor?.id === doctor.id && selectedDoctor?.duration === doctor.duration
                       ? 'border-primary ring-2 ring-primary'
                       : 'border-border'
                   )}
@@ -166,7 +166,7 @@ export function Step1SelectDoctorAndDate({ onNext, data, isSubmitting }: Step1Pr
                       <p className="text-xs text-muted-foreground">{doctor.services}</p>
                       <p className="text-xs text-muted-foreground mt-1">{getDoctorDuration(doctor)}</p>
                     </div>
-                    <Button variant={selectedDoctor?.id === doctor.id ? 'default' : 'outline'} size="sm" className="hidden sm:inline-flex rounded-full">
+                    <Button variant={selectedDoctor?.id === doctor.id && selectedDoctor?.duration === doctor.duration ? 'default' : 'outline'} size="sm" className="hidden sm:inline-flex rounded-full">
                       {t('selectButton')}
                     </Button>
                   </CardContent>
