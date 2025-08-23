@@ -85,15 +85,17 @@ export function Step1SelectDoctorAndDate({ onNext, data, isSubmitting }: Step1Pr
   useEffect(() => {
     // This effect runs only on the client, after hydration
     // which prevents a mismatch between server and client rendered HTML
-    const today = new Date();
-    if (today.getDay() === 0) { // If today is Sunday, select next day
-      const tomorrow = new Date(today);
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      setSelectedDate(tomorrow);
-    } else {
-      setSelectedDate(today);
+    if (!selectedDate) {
+      const today = new Date();
+      if (today.getDay() === 0) { // If today is Sunday, select next day
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        setSelectedDate(tomorrow);
+      } else {
+        setSelectedDate(today);
+      }
     }
-  }, []);
+  }, [selectedDate]);
 
   const handleDoctorSelect = (doctor: Doctor) => {
     setSelectedDoctor(doctor);
