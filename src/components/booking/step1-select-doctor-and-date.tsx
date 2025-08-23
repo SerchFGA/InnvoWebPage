@@ -27,6 +27,13 @@ const doctors: Doctor[] = [
     image: '/assets/DrPabloCarvajal.png',
   },
   {
+    id: 2,
+    name: 'Dr. Alfonso Carvajal',
+    services: 'HOMEOPATIA, TRAUMATOLOGIA, OSTEOPATIA',
+    duration: '30 min session',
+    image: 'https://placehold.co/80x80.png',
+  },
+  {
     id: 3,
     name: 'REVISIONES PODOACTIVA',
     services: 'REVISIONES DE PLANTILLAS',
