@@ -67,6 +67,11 @@ export function Step1SelectDoctorAndDate({ onNext, data, isSubmitting }: Step1Pr
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(data.date ?? undefined);
   const [hasInteracted, setHasInteracted] = useState(false);
   const { t, language } = useTranslation();
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const getDoctorDuration = (doctor: Doctor) => {
     if (language === 'es') {
@@ -129,9 +134,11 @@ export function Step1SelectDoctorAndDate({ onNext, data, isSubmitting }: Step1Pr
               selected={selectedDate}
               onSelect={handleDateSelect}
               disabled={
+                isClient ? 
                 (date) =>
                       date < new Date(new Date().setDate(new Date().getDate() - 1)) ||
                       date.getDay() === 0
+                : () => true
               }
               initialFocus
               className="rounded-xl border shadow-lg p-4"
