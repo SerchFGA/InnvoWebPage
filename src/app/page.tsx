@@ -32,15 +32,14 @@ const initialBookingData: BookingData = {
   availableTimes: null,
 };
 
-const N8N_AVAILABLE_TIMES_WEBHOOK_URL = process.env.NEXT_PUBLIC_N8N_AVAILABLE_TIMES_WEBHOOK_URL;
-
-
 export default function Home() {
   const [step, setStep] = useState(1);
   const [bookingData, setBookingData] = useState<BookingData>(initialBookingData);
   const [isStep1Submitting, setIsStep1Submitting] = useState(false);
   const { toast } = useToast();
   const { t } = useTranslation();
+  
+  const N8N_AVAILABLE_TIMES_WEBHOOK_URL = process.env.NEXT_PUBLIC_N8N_AVAILABLE_TIMES_WEBHOOK_URL;
 
   const nextStep = () => setStep((prev) => prev + 1);
   const prevStep = () => setStep((prev) => prev - 1);

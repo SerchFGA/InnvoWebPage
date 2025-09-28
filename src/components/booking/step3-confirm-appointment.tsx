@@ -23,12 +23,13 @@ interface Step3Props {
   onBack: () => void;
   data: BookingData;
 }
-const N8N_WEBHOOK_URL = process.env.NEXT_PUBLIC_N8N_SCHEDULE_APPOINTMENT_WEBHOOK_URL;
 
 export function Step3ConfirmAppointment({ onNext, onBack, data }: Step3Props) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
   const { t, language } = useTranslation();
+
+  const N8N_WEBHOOK_URL = process.env.NEXT_PUBLIC_N8N_SCHEDULE_APPOINTMENT_WEBHOOK_URL;
   
   const form = useForm<z.infer<typeof patientDetailsSchema>>({
     resolver: zodResolver(patientDetailsSchema(t)),
