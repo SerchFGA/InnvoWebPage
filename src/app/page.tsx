@@ -32,7 +32,7 @@ const initialBookingData: BookingData = {
   availableTimes: null,
 };
 
-const N8N_AVAILABLE_TIMES_WEBHOOK_URL = 'https://devn8n.pixanai.com/webhook/AvailableTimesInnvo';
+const N8N_AVAILABLE_TIMES_WEBHOOK_URL = process.env.NEXT_PUBLIC_N8N_AVAILABLE_TIMES_WEBHOOK_URL;
 
 export default function Home() {
   const [step, setStep] = useState(1);
@@ -46,6 +46,17 @@ export default function Home() {
 
   const handleStep1Submit = async (data: { doctor: Doctor; date: Date }) => {
     setIsStep1Submitting(true);
+    
+    if (!N8N_AVAILABLE_TIMES_WEBHOOK_URL) {
+      toast({
+        variant: "destructive",
+        title: t('errorTitle'),
+        description: "Configuration error: Webhook URL is not set.",
+      });
+      setIsStep1Submitting(false);
+      return;
+    }
+    
     try {
       const payload = {
         doctor: data.doctor.name,
