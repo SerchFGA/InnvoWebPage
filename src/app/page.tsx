@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import type { z } from 'zod';
 import { format } from 'date-fns';
+import getConfig from 'next/config';
 
 import { Step1SelectDoctorAndDate } from '@/components/booking/step1-select-doctor-and-date';
 import { Step2SelectTime } from '@/components/booking/step2-select-time';
@@ -32,7 +33,8 @@ const initialBookingData: BookingData = {
   availableTimes: null,
 };
 
-const N8N_AVAILABLE_TIMES_WEBHOOK_URL = process.env.NEXT_PUBLIC_N8N_AVAILABLE_TIMES_WEBHOOK_URL;
+const { publicRuntimeConfig } = getConfig();
+const N8N_AVAILABLE_TIMES_WEBHOOK_URL = publicRuntimeConfig.N8N_AVAILABLE_TIMES_WEBHOOK_URL;
 
 export default function Home() {
   const [step, setStep] = useState(1);
@@ -89,6 +91,7 @@ export default function Home() {
           title: t('noTimeSlotsTitle'),
           description: t('noTimeSlotsDescription'),
         });
+        setIsStep1Submitting(false);
         return;
       }
       

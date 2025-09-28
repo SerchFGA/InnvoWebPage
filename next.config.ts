@@ -18,6 +18,10 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  publicRuntimeConfig: {
+    N8N_AVAILABLE_TIMES_WEBHOOK_URL: process.env.NEXT_PUBLIC_N8N_AVAILABLE_TIMES_WEBHOOK_URL,
+    N8N_SCHEDULE_APPOINTMENT_WEBHOOK_URL: process.env.NEXT_PUBLIC_N8N_SCHEDULE_APPOINTMENT_WEBHOOK_URL,
+  },
 };
 
 export default nextConfig;
