@@ -7,7 +7,6 @@ import { format, parse } from 'date-fns';
 import { Loader2, ArrowLeft } from 'lucide-react';
 import { useState } from 'react';
 import { es } from 'date-fns/locale';
-import getConfig from 'next/config';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -24,8 +23,7 @@ interface Step3Props {
   onBack: () => void;
   data: BookingData;
 }
-const { publicRuntimeConfig } = getConfig();
-const N8N_WEBHOOK_URL = publicRuntimeConfig.N8N_SCHEDULE_APPOINTMENT_WEBHOOK_URL;
+const N8N_WEBHOOK_URL = process.env.NEXT_PUBLIC_N8N_SCHEDULE_APPOINTMENT_WEBHOOK_URL;
 
 export function Step3ConfirmAppointment({ onNext, onBack, data }: Step3Props) {
   const [isSubmitting, setIsSubmitting] = useState(false);
