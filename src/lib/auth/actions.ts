@@ -1,6 +1,6 @@
 'use server';
 
-import bcrypt from 'bcryptjs';
+import bcrypt from 'bcrypt';
 import { getSession } from '@/lib/session';
 import credentials from '@/lib/credentials.json';
 
