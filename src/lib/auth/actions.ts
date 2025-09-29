@@ -21,14 +21,21 @@ export async function login(
   const user = credentials.find(cred => cred.username === username);
 
   if (!user) {
+    console.error(`[Auth] Login failed: User not found for username: "${username}"`);
     return { success: false, message: 'Invalid credentials.' };
   }
 
   try {
+    // DIAGNOSTIC LOGGING
+    console.error(`[Auth] ATTEMPTING LOGIN FOR: "${username}"`);
+    console.error(`[Auth] PASSWORD RECEIVED: "${password}" (length: ${password.length})`);
+    console.error(`[Auth] HASH FROM DB: "${user.passwordHash}"`);
+
     const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
 
     if (!isPasswordValid) {
-      return { success: false, message: 'Invalid credentials.' };
+      console.error(`[Auth] bcrypt.compare FAILED for user: "${username}".`);
+      return { success: false, message: 'Invalid credentials. (Code: BCRYPT_FAIL)' };
     }
 
     // Set session
@@ -36,9 +43,11 @@ export async function login(
     session.isLoggedIn = true;
     await session.save();
 
+    console.log(`[Auth] Login successful for user: "${username}"`);
     return { success: true, message: 'Login successful.' };
+
   } catch (error) {
-    console.error(error);
+    console.error('[Auth] An unexpected error occurred during bcrypt.compare:', error);
     return { success: false, message: 'An unexpected server error occurred.' };
   }
 }
