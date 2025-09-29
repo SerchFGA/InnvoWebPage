@@ -13,8 +13,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { patientDetailsSchema } from '@/lib/schemas';
-import type { BookingData, PatientDetails } from '@/app/page';
+import { patientDetailsSchema, type PatientDetails } from '@/lib/schemas';
+import type { BookingData } from '@/app/page';
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from '@/contexts/language-context';
 
@@ -31,7 +31,7 @@ export function Step3ConfirmAppointment({ onNext, onBack, data }: Step3Props) {
 
   const N8N_WEBHOOK_URL = process.env.NEXT_PUBLIC_N8N_SCHEDULE_APPOINTMENT_WEBHOOK_URL;
   
-  const form = useForm<z.infer<typeof patientDetailsSchema>>({
+  const form = useForm<PatientDetails>({
     resolver: zodResolver(patientDetailsSchema(t)),
     defaultValues: {
       fullName: data.patientDetails?.fullName ?? '',
@@ -41,7 +41,7 @@ export function Step3ConfirmAppointment({ onNext, onBack, data }: Step3Props) {
     },
   });
 
-  async function onSubmit(values: z.infer<typeof patientDetailsSchema>) {
+  async function onSubmit(values: PatientDetails) {
     setIsSubmitting(true);
     
     if (!N8N_WEBHOOK_URL) {

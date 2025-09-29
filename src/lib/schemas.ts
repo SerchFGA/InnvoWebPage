@@ -9,7 +9,7 @@ export const doctorSchema = z.object({
   image: z.string(),
 });
 
-type Translator = (key: TranslationKey) => string;
+type Translator = (key: TranslationKey, data?: any) => string;
 
 export const patientDetailsSchema = (t?: Translator) => z.object({
   fullName: z.string().min(3, { message: t ? t('fullNameMin') : "Full name must be at least 3 characters." }),
@@ -19,3 +19,5 @@ export const patientDetailsSchema = (t?: Translator) => z.object({
   reason: z.string().min(1, { message: t ? t('reasonRequired') : "Reason for appointment is required." }),
   notes: z.string().optional(),
 });
+
+export type PatientDetails = z.infer<ReturnType<typeof patientDetailsSchema>>;

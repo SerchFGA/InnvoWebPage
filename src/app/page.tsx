@@ -8,13 +8,12 @@ import { Step1SelectDoctorAndDate } from '@/components/booking/step1-select-doct
 import { Step2SelectTime } from '@/components/booking/step2-select-time';
 import { Step3ConfirmAppointment } from '@/components/booking/step3-confirm-appointment';
 import { Step4Success } from '@/components/booking/step4-success';
-import type { doctorSchema, patientDetailsSchema } from '@/lib/schemas';
+import type { doctorSchema, PatientDetails } from '@/lib/schemas';
 import { useToast } from '@/hooks/use-toast';
 import { useTranslation } from '@/contexts/language-context';
 import { ProgressIndicator } from '@/components/layout/progress-indicator';
 
 export type Doctor = z.infer<typeof doctorSchema>;
-export type PatientDetails = z.infer<typeof patientDetailsSchema>;
 
 export type BookingData = {
   doctor: Doctor | null;

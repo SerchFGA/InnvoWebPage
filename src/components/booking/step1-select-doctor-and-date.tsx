@@ -107,9 +107,8 @@ export function Step1SelectDoctorAndDate({ onNext, data, isSubmitting }: Step1Pr
         setSelectedDate(today);
       }
     }
-  // The empty dependency array is crucial here to ensure this only runs once on the client
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isClient]);
+  // This effect should only run once on mount to set the initial date
+  }, [isClient, selectedDate]);
 
   const handleDoctorSelect = (doctor: Doctor) => {
     setSelectedDoctor(doctor);
