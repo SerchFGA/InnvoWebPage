@@ -52,7 +52,7 @@ export function Step1SelectDoctorAndDate({ onNext, data, isSubmitting }: Step1Pr
   useEffect(() => {
     // This effect runs only on the client, after hydration
     // which prevents a mismatch between server and client rendered HTML
-    if (!selectedDate) {
+    if (isClient && !selectedDate) {
       const today = new Date();
       if (today.getDay() === 0) { // If today is Sunday, select next day
         const tomorrow = new Date(today);
@@ -62,7 +62,6 @@ export function Step1SelectDoctorAndDate({ onNext, data, isSubmitting }: Step1Pr
         setSelectedDate(today);
       }
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isClient, selectedDate]);
 
   const handleDoctorSelect = (doctor: Doctor) => {
