@@ -1,6 +1,5 @@
 'use server';
 
-import bcrypt from 'bcrypt';
 import { getSession } from '@/lib/session';
 import credentials from '@/lib/credentials.json';
 
@@ -14,32 +13,27 @@ export async function login(
   const password = String(formData.get('password') || '').trim();
 
   if (!username || !password) {
-    return { success: false, message: 'El usuario y la contraseña son obligatorios.' };
+    return { success: false, message: 'Credenciales inválidas. (Code: EMPTY_FIELDS)' };
   }
 
   const user = credentials.find(cred => cred.username === username);
 
   if (!user) {
-    return { success: false, message: 'Credenciales inválidas.' };
+    return { success: false, message: 'Credenciales inválidas. (Code: USER_NOT_FOUND)' };
   }
 
-  try {
-    const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
+  // Temporary plaintext comparison for debugging
+  const isPasswordValid = password === user.password;
 
-    if (!isPasswordValid) {
-      return { success: false, message: 'Credenciales inválidas.' };
-    }
-
-    session.username = user.username;
-    session.isLoggedIn = true;
-    await session.save();
-
-    return { success: true, message: 'Login successful.' };
-
-  } catch (error) {
-    console.error('[Auth] An unexpected error occurred during login:', error);
-    return { success: false, message: 'Ocurrió un error inesperado en el servidor.' };
+  if (!isPasswordValid) {
+    return { success: false, message: 'Credenciales inválidas. (Code: INVALID_PASSWORD)' };
   }
+
+  session.username = user.username;
+  session.isLoggedIn = true;
+  await session.save();
+
+  return { success: true, message: 'Login successful.' };
 }
 
 export async function logout() {
