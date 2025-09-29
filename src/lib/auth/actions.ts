@@ -7,11 +7,11 @@ import credentials from '@/lib/credentials.json';
 export async function login(formData: FormData) {
   const session = await getSession();
   
-  const username = formData.get('username');
-  const password = formData.get('password');
+  const username = String(formData.get('username'));
+  const password = String(formData.get('password'));
 
-  if (!username || typeof username !== 'string' || !password || typeof password !== 'string') {
-    return { success: false, message: 'Username and password are required.' };
+  if (!username || !password) {
+    return { success: false, message: 'El usuario y la contraseña son obligatorios.' };
   }
 
   const user = credentials.find(cred => cred.username === username);
