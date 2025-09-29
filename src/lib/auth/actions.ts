@@ -14,20 +14,20 @@ export async function login(
   const password = String(formData.get('password') || '').trim();
 
   if (!username || !password) {
-    return { success: false, message: 'El usuario y la contraseña son obligatorios.' };
+    return { success: false, message: 'El usuario y la contraseña son obligatorios. (Code: EMPTY_FIELDS)' };
   }
 
   const user = credentials.find(cred => cred.username === username);
 
   if (!user) {
-    return { success: false, message: 'Invalid credentials.' };
+    return { success: false, message: 'Credenciales inválidas. (Code: USER_NOT_FOUND)' };
   }
 
   try {
     const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
 
     if (!isPasswordValid) {
-      return { success: false, message: 'Invalid credentials.' };
+      return { success: false, message: 'Credenciales inválidas. (Code: BCRYPT_FAIL)' };
     }
 
     session.username = user.username;
@@ -37,8 +37,8 @@ export async function login(
     return { success: true, message: 'Login successful.' };
 
   } catch (error) {
-    console.error('[Auth] An unexpected error occurred during bcrypt.compare:', error);
-    return { success: false, message: 'An unexpected server error occurred.' };
+    console.error('[Auth] An unexpected error occurred during login:', error);
+    return { success: false, message: 'Ocurrió un error inesperado en el servidor. (Code: UNEXPECTED_ERROR)' };
   }
 }
 

@@ -26,24 +26,20 @@ export default function LoginPage() {
   const { user } = useAuth();
   const router = useRouter();
   
-  // El primer elemento es el estado devuelto por la acción, el segundo es la función para invocarla.
   const [state, formAction] = useFormState(login, undefined);
 
   useEffect(() => {
-    // Si el usuario ya está logueado (verificado por el AuthProvider), redirigir.
     if (user.isLoggedIn) {
       router.push('/');
     }
   }, [user, router]);
 
   useEffect(() => {
-    // Si la acción del servidor devuelve éxito, refrescamos para que el servidor actualice la sesión.
     if (state?.success) {
       router.refresh();
     }
   }, [state, router]);
   
-  // No renderizar nada si el usuario ya está logueado para evitar un parpadeo.
   if (user.isLoggedIn) {
     return null;
   }
