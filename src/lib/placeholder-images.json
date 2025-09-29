@@ -1,0 +1,88 @@
+{
+  "doctors": [
+    {
+      "id": 2,
+      "name": "Dr. Alfonso Carvajal",
+      "services": "HOMEOPATIA, TRAUMATOLOGIA, OSTEOPATIA",
+      "duration": "30 min session",
+      "image": {
+        "src": "https://picsum.photos/seed/doc1/80/80",
+        "width": 80,
+        "height": 80,
+        "aiHint": "doctor portrait"
+      }
+    },
+    {
+      "id": 1,
+      "name": "Dr. Pablo Carvajal",
+      "services": "HOMEOPATIA, OSTEOPATIA",
+      "duration": "60 min session",
+      "image": {
+        "src": "/assets/DrPabloCarvajal.png",
+        "width": 80,
+        "height": 80,
+        "aiHint": "doctor portrait"
+      }
+    },
+    {
+      "id": 26,
+      "name": "Dr. Pablo Carvajal",
+      "services": "HOMEOPATIA, OSTEOPATIA",
+      "duration": "30 min session",
+      "image": {
+        "src": "/assets/DrPabloCarvajal.png",
+        "width": 80,
+        "height": 80,
+        "aiHint": "doctor portrait"
+      }
+    },
+    {
+      "id": 3,
+      "name": "REVISIONES PODOACTIVA",
+      "services": "REVISIONES DE PLANTILLAS",
+      "duration": "30 min session",
+      "image": {
+        "src": "https://picsum.photos/seed/pod1/80/80",
+        "width": 80,
+        "height": 80,
+        "aiHint": "foot care"
+      }
+    },
+    {
+      "id": 4,
+      "name": "ESTUDIO BIOMECANICO",
+      "services": "ESTUDIO DE LA PISADA",
+      "duration": "60 min session",
+      "image": {
+        "src": "https://picsum.photos/seed/bio1/80/80",
+        "width": 80,
+        "height": 80,
+        "aiHint": "biomechanics study"
+      }
+    },
+    {
+      "id": 5,
+      "name": "QUIROPODIA",
+      "services": "CUIDADOS DEL PIE",
+      "duration": "30 min session",
+      "image": {
+        "src": "https://picsum.photos/seed/pod2/80/80",
+        "width": 80,
+        "height": 80,
+        "aiHint": "podiatry tools"
+      }
+    },
+    {
+      "id": 6,
+      "name": "FISIOTERAPIA 01",
+      "services": "REHABILITACION FISICA",
+      "duration": "60 min session",
+      "image": {
+        "src": "https://picsum.photos/seed/fisi1/80/80",
+        "width": 80,
+        "height": 80,
+        "aiHint": "physical therapy"
+      }
+    }
+  ]
+}

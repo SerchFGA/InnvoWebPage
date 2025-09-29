@@ -10,58 +10,13 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { cn } from '@/lib/utils';
 import type { Doctor, BookingData } from '@/app/page';
 import { useTranslation } from '@/contexts/language-context';
+import placeholderData from '@/lib/placeholder-images.json';
 
-const doctors: Doctor[] = [
-  {
-    id: 2,
-    name: 'Dr. Alfonso Carvajal',
-    services: 'HOMEOPATIA, TRAUMATOLOGIA, OSTEOPATIA',
-    duration: '30 min session',
-    image: 'https://placehold.co/80x80.png',
-  },
-  {
-    id: 1,
-    name: 'Dr. Pablo Carvajal',
-    services: 'HOMEOPATIA, OSTEOPATIA',
-    duration: '60 min session',
-    image: '/assets/DrPabloCarvajal.png',
-  },
-  {
-    id: 26,
-    name: 'Dr. Pablo Carvajal',
-    services: 'HOMEOPATIA, OSTEOPATIA',
-    duration: '30 min session',
-    image: '/assets/DrPabloCarvajal.png',
-  },
-  {
-    id: 3,
-    name: 'REVISIONES PODOACTIVA',
-    services: 'REVISIONES DE PLANTILLAS',
-    duration: '30 min session',
-    image: 'https://placehold.co/80x80.png',
-  },
-  {
-    id: 4,
-    name: 'ESTUDIO BIOMECANICO',
-    services: 'ESTUDIO DE LA PISADA',
-    duration: '60 min session',
-    image: 'https://placehold.co/80x80.png',
-  },
-  {
-    id: 5,
-    name: 'QUIROPODIA',
-    services: 'CUIDADOS DEL PIE',
-    duration: '30 min session',
-    image: 'https://placehold.co/80x80.png',
-  },
-  {
-    id: 6,
-    name: 'FISIOTERAPIA 01',
-    services: 'REHABILITACION FISICA',
-    duration: '60 min session',
-    image: 'https://placehold.co/80x80.png',
-  },
-];
+const doctors: Doctor[] = placeholderData.doctors.map(doctor => ({
+  ...doctor,
+  image: doctor.image.src, // Keep the flat structure for the Doctor type
+}));
+
 
 interface Step1Props {
   onNext: (data: { doctor: Doctor; date: Date }) => void;
@@ -108,7 +63,7 @@ export function Step1SelectDoctorAndDate({ onNext, data, isSubmitting }: Step1Pr
       }
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isClient]);
+  }, [isClient, selectedDate]);
 
   const handleDoctorSelect = (doctor: Doctor) => {
     setSelectedDoctor(doctor);
@@ -154,10 +109,10 @@ export function Step1SelectDoctorAndDate({ onNext, data, isSubmitting }: Step1Pr
           {/* Right Column: Doctor List */}
           <div className="w-full lg:w-1/2">
             <div className="space-y-2 max-h-[450px] overflow-y-auto pr-2 -mr-4">
-              {doctors.map((doctor) => (
+              {placeholderData.doctors.map((doctor) => (
                 <Card
                   key={`${doctor.id}-${doctor.duration}`}
-                  onClick={() => handleDoctorSelect(doctor)}
+                  onClick={() => handleDoctorSelect({ ...doctor, image: doctor.image.src })}
                   className={cn(
                     'cursor-pointer transition-all hover:shadow-xl hover:border-primary',
                     selectedDoctor?.id === doctor.id && selectedDoctor?.duration === doctor.duration
@@ -167,17 +122,17 @@ export function Step1SelectDoctorAndDate({ onNext, data, isSubmitting }: Step1Pr
                 >
                   <CardContent className="p-3 flex items-center gap-4">
                     <Image
-                      src={doctor.image}
+                      src={doctor.image.src}
                       alt={doctor.name}
-                      width={64}
-                      height={64}
+                      width={doctor.image.width}
+                      height={doctor.image.height}
                       className="rounded-full"
-                      data-ai-hint="doctor portrait"
+                      data-ai-hint={doctor.image.aiHint}
                     />
                     <div className="flex-grow">
                       <p className="font-semibold text-md">{doctor.name}</p>
                       <p className="text-xs text-muted-foreground">{doctor.services}</p>
-                      <p className="text-xs text-muted-foreground mt-1">{getDoctorDuration(doctor)}</p>
+                      <p className="text-xs text-muted-foreground mt-1">{getDoctorDuration(doctor as Doctor)}</p>
                     </div>
                     <Button variant={selectedDoctor?.id === doctor.id && selectedDoctor?.duration === doctor.duration ? 'default' : 'outline'} size="sm" className="hidden sm:inline-flex rounded-full">
                       {t('selectButton')}
