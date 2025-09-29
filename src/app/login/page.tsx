@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect, FormEvent } from 'react';
+import { useEffect } from 'react';
+import { useFormState, useFormStatus } from 'react-dom';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/auth-context';
 import { Button } from '@/components/ui/button';
@@ -8,36 +9,41 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Loader2 } from 'lucide-react';
+import { login } from '@/lib/auth/actions';
+
+function SubmitButton() {
+  const { pending } = useFormStatus();
+
+  return (
+    <Button type="submit" className="w-full btn-gradient rounded-full" disabled={pending}>
+      {pending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+      {pending ? 'Verificando...' : 'Ingresar'}
+    </Button>
+  );
+}
 
 export default function LoginPage() {
-  const { user, login } = useAuth();
+  const { user } = useAuth();
   const router = useRouter();
-  const [error, setError] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // El primer elemento es el estado devuelto por la acción, el segundo es la función para invocarla.
+  const [state, formAction] = useFormState(login, undefined);
 
   useEffect(() => {
-    // Si el usuario ya está logueado, redirigir a la página principal
+    // Si el usuario ya está logueado (verificado por el AuthProvider), redirigir.
     if (user.isLoggedIn) {
       router.push('/');
     }
   }, [user, router]);
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setIsSubmitting(true);
-    setError(null);
-
-    const formData = new FormData(event.currentTarget);
-    const result = await login(formData);
-
-    if (!result.success) {
-      setError(result.message || 'Ocurrió un error inesperado.');
+  useEffect(() => {
+    // Si la acción del servidor devuelve éxito, refrescamos para que el servidor actualice la sesión.
+    if (state?.success) {
+      router.refresh();
     }
-    // La redirección en caso de éxito es manejada por el AuthContext
-    setIsSubmitting(false);
-  }
+  }, [state, router]);
   
-  // No renderizar nada si el usuario ya está logueado para evitar un parpadeo
+  // No renderizar nada si el usuario ya está logueado para evitar un parpadeo.
   if (user.isLoggedIn) {
     return null;
   }
@@ -52,7 +58,7 @@ export default function LoginPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form action={formAction} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="username">Usuario</Label>
               <Input
@@ -61,7 +67,6 @@ export default function LoginPage() {
                 type="text"
                 placeholder="Tu nombre de usuario"
                 required
-                disabled={isSubmitting}
               />
             </div>
             <div className="space-y-2">
@@ -72,16 +77,12 @@ export default function LoginPage() {
                 type="password"
                 placeholder="Tu contraseña"
                 required
-                disabled={isSubmitting}
               />
             </div>
-            {error && (
-              <p className="text-sm font-medium text-destructive">{error}</p>
+            {state?.success === false && state.message && (
+              <p className="text-sm font-medium text-destructive">{state.message}</p>
             )}
-            <Button type="submit" className="w-full btn-gradient rounded-full" disabled={isSubmitting}>
-              {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {isSubmitting ? 'Verificando...' : 'Ingresar'}
-            </Button>
+            <SubmitButton />
           </form>
         </CardContent>
       </Card>

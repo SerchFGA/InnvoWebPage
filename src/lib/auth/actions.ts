@@ -4,11 +4,14 @@ import bcrypt from 'bcrypt';
 import { getSession } from '@/lib/session';
 import credentials from '@/lib/credentials.json';
 
-export async function login(formData: FormData) {
+export async function login(
+  prevState: { success: boolean; message: string } | undefined,
+  formData: FormData
+) {
   const session = await getSession();
   
-  const username = String(formData.get('username') || '');
-  const password = String(formData.get('password') || '');
+  const username = String(formData.get('username') || '').trim();
+  const password = String(formData.get('password') || '').trim();
 
   if (!username || !password) {
     return { success: false, message: 'El usuario y la contraseña son obligatorios.' };
@@ -21,19 +24,23 @@ export async function login(formData: FormData) {
     return { success: false, message: 'Invalid credentials.' };
   }
 
-  // Compare password
-  const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
+  try {
+    const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
 
-  if (!isPasswordValid) {
-    return { success: false, message: 'Invalid credentials.' };
+    if (!isPasswordValid) {
+      return { success: false, message: 'Invalid credentials.' };
+    }
+
+    // Set session
+    session.username = user.username;
+    session.isLoggedIn = true;
+    await session.save();
+
+    return { success: true, message: 'Login successful.' };
+  } catch (error) {
+    console.error(error);
+    return { success: false, message: 'An unexpected server error occurred.' };
   }
-
-  // Set session
-  session.username = user.username;
-  session.isLoggedIn = true;
-  await session.save();
-
-  return { success: true };
 }
 
 export async function logout() {

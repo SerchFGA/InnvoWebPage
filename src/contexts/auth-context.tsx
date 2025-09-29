@@ -1,8 +1,8 @@
 'use client';
 
-import React, { createContext, useState, useContext, ReactNode, useCallback } from 'react';
+import React, { createContext, useContext, ReactNode, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { login as loginAction, logout as logoutAction } from '@/lib/auth/actions';
+import { logout as logoutAction } from '@/lib/auth/actions';
 
 interface User {
   isLoggedIn: boolean;
@@ -11,7 +11,6 @@ interface User {
 
 interface AuthContextType {
   user: User;
-  login: (formData: FormData) => Promise<{ success: boolean; message?: string }>;
   logout: () => Promise<void>;
 }
 
@@ -22,30 +21,18 @@ interface AuthProviderProps {
   user: User;
 }
 
-export function AuthProvider({ children, user: initialUser }: AuthProviderProps) {
-  const [user, setUser] = useState<User>(initialUser);
+export function AuthProvider({ children, user }: AuthProviderProps) {
   const router = useRouter();
-
-  const login = useCallback(async (formData: FormData) => {
-    const result = await loginAction(formData);
-    if (result.success) {
-      // Upon successful login, we need to refresh the page to make sure
-      // the new session is picked up by the server components.
-      router.push('/');
-      router.refresh();
-    }
-    return result;
-  }, [router]);
 
   const logout = useCallback(async () => {
     await logoutAction();
-    // Upon logout, we also need to refresh the page.
+    // Forzar una actualización completa para que el servidor reconozca el estado de cierre de sesión.
     router.push('/login');
     router.refresh();
   }, [router]);
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, logout }}>
       {children}
     </AuthContext.Provider>
   );
