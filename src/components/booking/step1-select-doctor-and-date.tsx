@@ -107,8 +107,8 @@ export function Step1SelectDoctorAndDate({ onNext, data, isSubmitting }: Step1Pr
         setSelectedDate(today);
       }
     }
-  // This effect should only run once on mount to set the initial date
-  }, [isClient, selectedDate]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isClient]);
 
   const handleDoctorSelect = (doctor: Doctor) => {
     setSelectedDoctor(doctor);
