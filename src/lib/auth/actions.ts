@@ -1,7 +1,7 @@
 'use server';
 
 import bcrypt from 'bcryptjs';
-import { getSession, updateSession } from '@/lib/session';
+import { getSession } from '@/lib/session';
 import credentials from '@/lib/credentials.json';
 
 export async function login(formData: FormData) {
@@ -27,7 +27,7 @@ export async function login(formData: FormData) {
 
   session.username = user.username;
   session.isLoggedIn = true;
-  await updateSession(session);
+  await session.save();
 
   return { success: true };
 }
@@ -35,5 +35,4 @@ export async function login(formData: FormData) {
 export async function logout() {
   const session = await getSession();
   session.destroy();
-  await updateSession(session);
 }

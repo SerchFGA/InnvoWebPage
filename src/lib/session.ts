@@ -1,7 +1,6 @@
 import 'server-only';
 import { SessionOptions, getIronSession } from 'iron-session';
 import { cookies } from 'next/headers';
-import { revalidatePath } from 'next/cache';
 
 export interface SessionData {
   username: string;
@@ -24,9 +23,4 @@ export async function getSession() {
     session.username = '';
   }
   return session;
-}
-
-export async function updateSession(session: any) {
-  await session.save();
-  revalidatePath('/', 'layout');
 }
