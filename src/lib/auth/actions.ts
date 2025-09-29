@@ -13,7 +13,7 @@ export async function login(formData: FormData) {
     return { success: false, message: 'Username and password are required.' };
   }
 
-  const user = credentials.find(cred => cred.username.toLowerCase() === username.toLowerCase());
+  const user = credentials.find(cred => cred.username === username);
 
   if (!user) {
     return { success: false, message: 'Invalid credentials.' };
