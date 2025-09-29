@@ -29,16 +29,17 @@ export function AuthProvider({ children, user: initialUser }: AuthProviderProps)
   const login = useCallback(async (formData: FormData) => {
     const result = await loginAction(formData);
     if (result.success) {
-      setUser({ isLoggedIn: true, username: formData.get('username') as string });
+      // Upon successful login, we need to refresh the page to make sure
+      // the new session is picked up by the server components.
       router.push('/');
-      router.refresh(); 
+      router.refresh();
     }
     return result;
   }, [router]);
 
   const logout = useCallback(async () => {
     await logoutAction();
-    setUser({ isLoggedIn: false, username: '' });
+    // Upon logout, we also need to refresh the page.
     router.push('/login');
     router.refresh();
   }, [router]);

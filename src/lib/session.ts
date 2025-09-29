@@ -7,7 +7,7 @@ export interface SessionData {
   isLoggedIn: boolean;
 }
 
-export const sessionOptions: SessionOptions = {
+const sessionOptions: SessionOptions = {
   password: process.env.SESSION_SECRET as string,
   cookieName: 'innovo-session',
   cookieOptions: {

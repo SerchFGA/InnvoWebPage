@@ -7,25 +7,28 @@ import credentials from '@/lib/credentials.json';
 export async function login(formData: FormData) {
   const session = await getSession();
   
-  const username = String(formData.get('username'));
-  const password = String(formData.get('password'));
+  const username = String(formData.get('username') || '');
+  const password = String(formData.get('password') || '');
 
   if (!username || !password) {
     return { success: false, message: 'El usuario y la contraseña son obligatorios.' };
   }
 
+  // Find user (case-sensitive)
   const user = credentials.find(cred => cred.username === username);
 
   if (!user) {
     return { success: false, message: 'Invalid credentials.' };
   }
 
+  // Compare password
   const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
 
   if (!isPasswordValid) {
     return { success: false, message: 'Invalid credentials.' };
   }
 
+  // Set session
   session.username = user.username;
   session.isLoggedIn = true;
   await session.save();
