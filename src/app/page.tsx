@@ -1,8 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { z } from 'zod';
 import { format } from 'date-fns';
+import { useRouter } from 'next/navigation';
+import { Loader2 } from 'lucide-react';
 
 import { Step1SelectDoctorAndDate } from '@/components/booking/step1-select-doctor-and-date';
 import { Step2SelectTime } from '@/components/booking/step2-select-time';
@@ -12,6 +14,7 @@ import type { doctorSchema, PatientDetails } from '@/lib/schemas';
 import { useToast } from '@/hooks/use-toast';
 import { useTranslation } from '@/contexts/language-context';
 import { ProgressIndicator } from '@/components/layout/progress-indicator';
+import { useAuth } from '@/contexts/auth-context';
 
 export type Doctor = z.infer<typeof doctorSchema>;
 
@@ -37,6 +40,14 @@ export default function Home() {
   const [isStep1Submitting, setIsStep1Submitting] = useState(false);
   const { toast } = useToast();
   const { t } = useTranslation();
+  const { user } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!user.isLoggedIn) {
+      router.push('/login');
+    }
+  }, [user, router]);
   
   const N8N_AVAILABLE_TIMES_WEBHOOK_URL = process.env.NEXT_PUBLIC_N8N_AVAILABLE_TIMES_WEBHOOK_URL;
 
@@ -46,7 +57,8 @@ export default function Home() {
   const handleStep1Submit = async (data: { doctor: Doctor; date: Date }) => {
     setIsStep1Submitting(true);
     
-    if (!N8N_AVAILABLE_TIMES_WEBHOOK_URL) {
+    const N8N_WEBHOOK_URL = process.env.NEXT_PUBLIC_N8N_AVAILABLE_TIMES_WEBHOOK_URL;
+    if (!N8N_WEBHOOK_URL) {
       toast({
         variant: "destructive",
         title: t('errorTitle'),
@@ -63,7 +75,7 @@ export default function Home() {
         Fecha: format(data.date, 'yyyy-MM-dd'),
       };
 
-      const response = await fetch(N8N_AVAILABLE_TIMES_WEBHOOK_URL, {
+      const response = await fetch(N8N_WEBHOOK_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
@@ -133,6 +145,15 @@ export default function Home() {
     setBookingData(initialBookingData);
     setStep(1);
   };
+  
+  // Render a loading state or null while checking for auth and redirecting
+  if (!user.isLoggedIn) {
+    return (
+      <div className="flex items-center justify-center min-h-[calc(100vh-200px)]">
+        <Loader2 className="h-16 w-16 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col items-center justify-center p-4 sm:p-6 md:p-8">
