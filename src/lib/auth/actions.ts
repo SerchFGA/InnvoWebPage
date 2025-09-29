@@ -6,10 +6,11 @@ import credentials from '@/lib/credentials.json';
 
 export async function login(formData: FormData) {
   const session = await getSession();
-  const username = formData.get('username') as string;
-  const password = formData.get('password') as string;
+  
+  const username = formData.get('username');
+  const password = formData.get('password');
 
-  if (!username || !password) {
+  if (!username || typeof username !== 'string' || !password || typeof password !== 'string') {
     return { success: false, message: 'Username and password are required.' };
   }
 
