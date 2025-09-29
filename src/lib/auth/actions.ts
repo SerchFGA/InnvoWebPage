@@ -35,4 +35,5 @@ export async function login(formData: FormData) {
 export async function logout() {
   const session = await getSession();
   session.destroy();
+  await session.save();
 }
