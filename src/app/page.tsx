@@ -105,7 +105,7 @@ export default function Home() {
       }
       
       // Format hours from "13:00" to "1:00 PM"
-      const availableTimes = hours.map((hourString) => {
+      const availableTimes = hours.map((hourString: string) => {
         const [hour, minute] = hourString.split(':');
         const d = new Date();
         d.setHours(parseInt(hour, 10), parseInt(minute, 10), 0, 0);
