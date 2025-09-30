@@ -6,7 +6,12 @@ export const doctorSchema = z.object({
   name: z.string(),
   services: z.string(),
   duration: z.string(),
-  image: z.string(),
+  image: z.object({
+    src: z.string(),
+    width: z.number(),
+    height: z.number(),
+    aiHint: z.string(),
+  }),
 });
 
 type Translator = (key: TranslationKey, data?: any) => string;

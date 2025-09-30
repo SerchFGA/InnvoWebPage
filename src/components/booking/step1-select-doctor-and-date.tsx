@@ -14,7 +14,6 @@ import placeholderData from '@/lib/placeholder-images.json';
 
 const doctors: Doctor[] = placeholderData.doctors.map(doctor => ({
   ...doctor,
-  image: doctor.image.src, // Keep the flat structure for the Doctor type
 }));
 
 
@@ -108,10 +107,10 @@ export function Step1SelectDoctorAndDate({ onNext, data, isSubmitting }: Step1Pr
           {/* Right Column: Doctor List */}
           <div className="w-full lg:w-1/2">
             <div className="space-y-2 max-h-[450px] overflow-y-auto pr-2 -mr-4">
-              {placeholderData.doctors.map((doctor) => (
+              {doctors.map((doctor) => (
                 <Card
                   key={`${doctor.id}-${doctor.duration}`}
-                  onClick={() => handleDoctorSelect({ ...doctor, image: doctor.image.src })}
+                  onClick={() => handleDoctorSelect(doctor)}
                   className={cn(
                     'cursor-pointer transition-all hover:shadow-xl hover:border-primary',
                     selectedDoctor?.id === doctor.id && selectedDoctor?.duration === doctor.duration
@@ -131,7 +130,7 @@ export function Step1SelectDoctorAndDate({ onNext, data, isSubmitting }: Step1Pr
                     <div className="flex-grow">
                       <p className="font-semibold text-md">{doctor.name}</p>
                       <p className="text-xs text-muted-foreground">{doctor.services}</p>
-                      <p className="text-xs text-muted-foreground mt-1">{getDoctorDuration(doctor as Doctor)}</p>
+                      <p className="text-xs text-muted-foreground mt-1">{getDoctorDuration(doctor)}</p>
                     </div>
                     <Button variant={selectedDoctor?.id === doctor.id && selectedDoctor?.duration === doctor.duration ? 'default' : 'outline'} size="sm" className="hidden sm:inline-flex rounded-full">
                       {t('selectButton')}
