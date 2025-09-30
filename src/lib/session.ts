@@ -1,22 +1,21 @@
-import 'server-only';
-import { SessionOptions, getIronSession } from 'iron-session';
-import { cookies } from 'next/headers';
+import { getIronSession, type IronSessionOptions } from "iron-session";
+import { cookies } from "next/headers";
 
 export interface SessionData {
-  username: string;
   isLoggedIn: boolean;
+  username: string;
 }
 
-const sessionOptions: SessionOptions = {
-  password: process.env.SESSION_SECRET as string,
-  cookieName: 'innovo-session',
-  cookieOptions: {
-    secure: process.env.NODE_ENV === 'production',
-  },
+export const sessionOptions: IronSessionOptions = {
+  password: process.env.SESSION_SECRET!,
+  cookieName: "innovo-session",
+  cookieOptions: { secure: process.env.NODE_ENV === "production" },
 };
 
 export async function getSession() {
-  const session = await getIronSession<SessionData>(cookies(), sessionOptions);
+  const store = await cookies(); // Next 15 retorna Promise<ReadonlyRequestCookies>
+  // Cast controlado para compatibilidad con iron-session
+  const session = await getIronSession<SessionData>(store as unknown as any, sessionOptions);
   
   if (!session.isLoggedIn) {
     session.isLoggedIn = false;
