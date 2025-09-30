@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
-import { getIronSession, type IronSessionOptions } from "iron-session";
+import { getIronSession, type SessionOptions } from "iron-session";
 import { cookies } from "next/headers";
 
-const sessionOptions: IronSessionOptions = {
+const sessionOptions: SessionOptions = {
   password: process.env.SESSION_SECRET!,
   cookieName: "innvo_session",
   cookieOptions: { secure: process.env.NODE_ENV === "production" },
@@ -10,7 +10,7 @@ const sessionOptions: IronSessionOptions = {
 
 export async function GET() {
   const store = await cookies();
-  const session = await getIronSession<{ isLoggedIn: boolean }>(store as any, sessionOptions);
+  const session = await getIronSession<{ isLoggedIn: boolean }>(store, sessionOptions);
 
   if (!session.isLoggedIn) {
     session.isLoggedIn = true;
