@@ -2,17 +2,20 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { LogOut, User as UserIcon } from 'lucide-react';
+import { LogOut, User as UserIcon, CalendarPlus, Search } from 'lucide-react';
+import { usePathname } from 'next/navigation';
 
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { useTranslation } from '@/contexts/language-context';
 import { useAuth } from '@/contexts/auth-context';
+import { cn } from '@/lib/utils';
 
 export function Header() {
-  const { language, setLanguage } = useTranslation();
+  const { language, setLanguage, t } = useTranslation();
   const { user, logout } = useAuth();
+  const pathname = usePathname();
 
   const handleLanguageChange = (checked: boolean) => {
     setLanguage(checked ? 'es' : 'en');
@@ -43,7 +46,22 @@ export function Header() {
 
           {user.isLoggedIn && (
             <div className="flex items-center gap-4 border-l pl-4">
-              <div className="flex items-center gap-2">
+               <nav className="flex items-center gap-2">
+                <Link href="/" passHref>
+                  <Button variant={pathname === '/' ? 'default' : 'ghost'} size="sm" className="rounded-full">
+                    <CalendarPlus className="mr-2 h-4 w-4" />
+                    {t('menu_agendar')}
+                  </Button>
+                </Link>
+                <Link href="/patients/search" passHref>
+                  <Button variant={pathname === '/patients/search' ? 'default' : 'ghost'} size="sm" className="rounded-full">
+                    <Search className="mr-2 h-4 w-4" />
+                    {t('menu_buscarPaciente')}
+                  </Button>
+                </Link>
+              </nav>
+
+              <div className="flex items-center gap-2 border-l pl-4">
                 <UserIcon className="h-5 w-5 text-muted-foreground" />
                 <span className="text-sm font-semibold text-foreground">{user.username}</span>
               </div>

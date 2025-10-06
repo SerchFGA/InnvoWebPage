@@ -1,5 +1,9 @@
 export const translations = {
   en: {
+    // Menu
+    menu_agendar: 'Scheduler',
+    menu_buscarPaciente: 'Search Patient',
+
     // Progress Bar
     progressStep1: 'Select Doctor & Date',
     progressStep2: 'Select Time',
@@ -50,6 +54,18 @@ export const translations = {
     fullNameMin: 'Full name must be at least 3 characters.',
     phoneRegex: 'Please enter a valid 10-digit phone number.',
     reasonRequired: 'Reason for appointment is required.',
+
+    // Patient Search
+    search_title: 'Search Patient',
+    search_subtitle: 'Enter the phone number in the requested format',
+    search_labels_cc: 'Country',
+    search_labels_fixed: 'Fixed',
+    search_labels_number10: 'Phone Number',
+    search_cta: 'Search',
+    search_errors_invalidInput: 'The provided data is invalid.',
+    search_errors_server: 'Could not retrieve patient data. Please try again.',
+    search_empty: 'No appointments found for this patient.',
+    search_patient_info: 'Patient Information',
     
     // Footer
     footerAllRightsReserved: 'All rights reserved.',
@@ -59,6 +75,10 @@ export const translations = {
     footerPoweredBy: 'Powered by'
   },
   es: {
+    // Menu
+    menu_agendar: 'Agendar',
+    menu_buscarPaciente: 'Buscar Paciente',
+
     // Progress Bar
     progressStep1: 'Seleccionar Doctor y Fecha',
     progressStep2: 'Seleccionar Hora',
@@ -109,6 +129,18 @@ export const translations = {
     fullNameMin: 'El nombre completo debe tener al menos 3 caracteres.',
     phoneRegex: 'Por favor, ingresa un número de teléfono válido de 10 dígitos.',
     reasonRequired: 'El motivo de la cita es obligatorio.',
+
+    // Patient Search
+    search_title: 'Buscar Paciente',
+    search_subtitle: 'Ingresa el teléfono en el formato solicitado.',
+    search_labels_cc: 'País',
+    search_labels_fixed: 'Fijo',
+    search_labels_number10: 'Teléfono',
+    search_cta: 'Buscar',
+    search_errors_invalidInput: 'Los datos proporcionados son inválidos.',
+    search_errors_server: 'No se pudo obtener la información del paciente. Intenta de nuevo.',
+    search_empty: 'No se encontraron citas para este paciente.',
+    search_patient_info: 'Información del Paciente',
 
     // Footer
     footerAllRightsReserved: 'Todos los derechos reservados.',
