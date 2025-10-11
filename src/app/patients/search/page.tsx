@@ -76,39 +76,37 @@ function AppointmentCard({ appointment }: { appointment: PatientData['appointmen
     });
 
     return (
-        <Card className="shadow-md rounded-lg" data-appointment-id={appointment.appointmentId}>
-            <CardContent className="p-4 space-y-3">
-                <div className="flex flex-col sm:flex-row justify-between sm:items-start gap-4">
-                    <div className='flex-grow'>
-                        <p className="font-bold text-lg text-primary">{appointment.service}</p>
-                         <div className="text-sm text-muted-foreground space-y-2 mt-2">
-                            <p className="flex items-center gap-2"><Activity className="w-4 h-4"/> <strong>Status:</strong> {appointment.status}</p>
-                            <p className="flex items-center gap-2"><Tag className="w-4 h-4"/> <strong>Doctor ID:</strong> {appointment.doctorId}</p>
-                            <p className="flex items-center gap-2"><CalendarIcon className="w-4 h-4"/> {formattedDate}</p>
-                        </div>
+        <Card className="shadow-md rounded-lg flex flex-col" data-appointment-id={appointment.appointmentId}>
+            <CardContent className="p-4 flex-grow flex flex-col">
+                <div className='flex-grow'>
+                    <p className="font-bold text-lg text-primary">{appointment.service}</p>
+                     <div className="text-sm text-muted-foreground space-y-2 mt-2">
+                        <p className="flex items-center gap-2"><Activity className="w-4 h-4"/> <strong>Status:</strong> {appointment.status}</p>
+                        <p className="flex items-center gap-2"><Tag className="w-4 h-4"/> <strong>Doctor ID:</strong> {appointment.doctorId}</p>
+                        <p className="flex items-center gap-2"><CalendarIcon className="w-4 h-4"/> {formattedDate}</p>
                     </div>
-                    <div className="flex flex-col sm:flex-row gap-2 self-stretch sm:self-start">
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            className="min-w-28"
-                            data-action="cancel"
-                            aria-label={a11yCancelLabel}
-                            onClick={() => handleActionClick('cancel')}
-                        >
-                            {t('appt_actions_cancel')}
-                        </Button>
-                        <Button
-                            variant="default"
-                            size="sm"
-                            className="min-w-28 btn-gradient"
-                            data-action="reschedule"
-                            aria-label={a11yRescheduleLabel}
-                            onClick={() => handleActionClick('reschedule')}
-                        >
-                            {t('appt_actions_reschedule')}
-                        </Button>
-                    </div>
+                </div>
+                <div className="flex flex-col sm:flex-row gap-2 mt-auto pt-4">
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full sm:w-auto min-w-28"
+                        data-action="cancel"
+                        aria-label={a11yCancelLabel}
+                        onClick={() => handleActionClick('cancel')}
+                    >
+                        {t('appt_actions_cancel')}
+                    </Button>
+                    <Button
+                        variant="default"
+                        size="sm"
+                        className="w-full sm:w-auto min-w-28 btn-gradient"
+                        data-action="reschedule"
+                        aria-label={a11yRescheduleLabel}
+                        onClick={() => handleActionClick('reschedule')}
+                    >
+                        {t('appt_actions_reschedule')}
+                    </Button>
                 </div>
                 <p className="text-xs text-gray-400 flex items-center gap-1 pt-2"><Hash className="w-3 h-3"/> {appointment.calendarId}</p>
             </CardContent>
