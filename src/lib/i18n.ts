@@ -66,6 +66,12 @@ export const translations = {
     search_errors_server: 'Could not retrieve patient data. Please try again.',
     search_empty: 'No appointments found for this patient.',
     search_patient_info: 'Patient Information',
+
+    // Appointment Card Actions
+    appt_actions_cancel: "Cancel",
+    appt_actions_reschedule: "Reschedule",
+    appt_a11y_cancel: "Cancel appointment {{service}} with doctor {{doctorId}} on {{start}}.",
+    appt_a11y_reschedule: "Reschedule appointment {{service}} with doctor {{doctorId}} on {{start}}.",
     
     // Footer
     footerAllRightsReserved: 'All rights reserved.',
@@ -141,6 +147,12 @@ export const translations = {
     search_errors_server: 'No se pudo obtener la información del paciente. Intenta de nuevo.',
     search_empty: 'No se encontraron citas para este paciente.',
     search_patient_info: 'Información del Paciente',
+
+    // Appointment Card Actions
+    appt_actions_cancel: "Cancelar",
+    appt_actions_reschedule: "Reagendar",
+    appt_a11y_cancel: "Cancelar cita {{service}} del doctor {{doctorId}} el {{start}}.",
+    appt_a11y_reschedule: "Reagendar cita {{service}} del doctor {{doctorId}} el {{start}}.",
 
     // Footer
     footerAllRightsReserved: 'Todos los derechos reservados.',
