@@ -1,3 +1,4 @@
+
 'use server';
 
 import { z } from 'zod';
@@ -9,7 +10,15 @@ const patientSearchSchema = z.object({
   phoneNumber: z.string().length(10).regex(/^\d+$/),
 });
 
-const WEBHOOK_URL = 'https://devn8n.pixanai.com/webhook/GetUsersDatesInnvo';
+const cancelAppointmentSchema = z.object({
+  CalendarID: z.string().min(1),
+  FechaCita: z.string().min(1),
+  TelefonoUsuario: z.string().regex(/^\d{11,14}$/),
+  ID_Doctor: z.number(),
+});
+
+const SEARCH_WEBHOOK_URL = 'https://devn8n.pixanai.com/webhook/GetUsersDatesInnvo';
+const CANCEL_WEBHOOK_URL = 'https://devn8n.pixanai.com/webhook/CancelAppointmentInnvo';
 
 export type PatientData = {
   patientName: string;
@@ -33,20 +42,25 @@ export type SearchResult = {
   error: 'invalid-input' | 'server-error';
 };
 
+export type CancelResult = {
+  success: true;
+} | {
+  success: false;
+  error: 'invalid-input' | 'server-error' | 'rate-limited';
+};
+
 // Simple in-memory store for rate limiting
 const requestCounts = new Map<string, { count: number, start: number }>();
 
-async function checkRateLimit(sessionId: string) {
+async function checkRateLimit(key: string, maxRequests: number, windowMs: number) {
   const now = Date.now();
-  const windowMs = 60 * 1000; // 1 minute
-  const maxRequests = 10;
 
-  if (!requestCounts.has(sessionId) || (now - requestCounts.get(sessionId)!.start > windowMs)) {
-    requestCounts.set(sessionId, { count: 1, start: now });
+  if (!requestCounts.has(key) || (now - requestCounts.get(key)!.start > windowMs)) {
+    requestCounts.set(key, { count: 1, start: now });
     return true;
   }
 
-  const sessionData = requestCounts.get(sessionId)!;
+  const sessionData = requestCounts.get(key)!;
   if (sessionData.count < maxRequests) {
     sessionData.count++;
     return true;
@@ -67,8 +81,8 @@ export async function searchPatientByPhone(
     return { success: false, error: 'server-error' };
   }
 
-  const isAllowed = await checkRateLimit(session.username);
-  if (!isAllowed) {
+  const isSearchAllowed = await checkRateLimit(`search:${session.username}`, 10, 60 * 1000); // 10 per minute
+  if (!isSearchAllowed) {
     console.warn({
       event: 'patient_search_rate_limited',
       requestId,
@@ -102,13 +116,14 @@ export async function searchPatientByPhone(
   const fullPhone = `${validation.data.countryCode}1${validation.data.phoneNumber}`;
   
   try {
-    const response = await fetch(WEBHOOK_URL, {
+    const response = await fetch(SEARCH_WEBHOOK_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         requestId: requestId,
         phone: fullPhone,
       }),
+      cache: 'no-store'
     });
 
     const durationMs = Date.now() - startTime;
@@ -143,6 +158,69 @@ export async function searchPatientByPhone(
   } catch (e) {
     const durationMs = Date.now() - startTime;
     console.error({ ...logPayload, event: 'patient_search_response', ok: false, errorCode: 'exception', durationMs, message: (e instanceof Error) ? e.message : 'Unknown error' });
+    return { success: false, error: 'server-error' };
+  }
+}
+
+export async function cancelAppointment(
+  appointmentData: z.infer<typeof cancelAppointmentSchema>
+): Promise<CancelResult> {
+  const session = await getSession();
+  const requestId = randomUUID();
+  const startTime = Date.now();
+
+  const logPayload = {
+      event: 'cancel_request',
+      requestId,
+      user: session.username,
+      calendarId: appointmentData.CalendarID,
+      doctorId: appointmentData.ID_Doctor,
+      phoneLast4: appointmentData.TelefonoUsuario.slice(-4),
+  };
+  console.log(JSON.stringify(logPayload));
+
+  if (!session.isLoggedIn || !session.username) {
+    console.error({ ...logPayload, event: 'cancel_response', ok: false, errorCode: 'unauthenticated', durationMs: Date.now() - startTime });
+    return { success: false, error: 'server-error' };
+  }
+
+  const isCancelAllowed = await checkRateLimit(`cancel:${session.username}`, 5, 60 * 1000); // 5 per minute
+  if (!isCancelAllowed) {
+    console.warn({ ...logPayload, event: 'cancel_response', ok: false, errorCode: 'rate-limited', durationMs: Date.now() - startTime });
+    return { success: false, error: 'rate-limited' };
+  }
+
+  const validation = cancelAppointmentSchema.safeParse(appointmentData);
+
+  if (!validation.success) {
+    console.error({ ...logPayload, event: 'cancel_response', ok: false, errorCode: 'invalid-input', errors: validation.error.flatten(), durationMs: Date.now() - startTime });
+    return { success: false, error: 'invalid-input' };
+  }
+
+  try {
+    const response = await fetch(CANCEL_WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        requestId,
+        ...validation.data
+      }),
+      cache: 'no-store'
+    });
+
+    const durationMs = Date.now() - startTime;
+
+    if (!response.ok) {
+        console.error({ ...logPayload, event: 'cancel_response', ok: false, errorCode: 'webhook-error', status: response.status, durationMs });
+        return { success: false, error: 'server-error' };
+    }
+
+    console.log({ ...logPayload, event: 'cancel_response', ok: true, durationMs });
+
+    return { success: true };
+  } catch (e) {
+    const durationMs = Date.now() - startTime;
+    console.error({ ...logPayload, event: 'cancel_response', ok: false, errorCode: 'exception', durationMs, message: (e instanceof Error) ? e.message : 'Unknown error' });
     return { success: false, error: 'server-error' };
   }
 }

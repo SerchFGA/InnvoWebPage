@@ -1,6 +1,7 @@
+
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useTransition } from 'react';
 import { useActionState } from 'react';
 import { useFormStatus } from 'react-dom';
 import { Loader2, User, Calendar as CalendarIcon, Hash, Tag, Activity, Phone } from 'lucide-react';
@@ -10,8 +11,12 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { useToast } from '@/hooks/use-toast';
+import { cn } from '@/lib/utils';
+import { searchPatientByPhone, cancelAppointment, type PatientData } from './actions';
 
-import { searchPatientByPhone, type PatientData } from './actions';
+type Appointment = PatientData['appointments'][0];
 
 function SubmitButton({ disabled }: { disabled: boolean }) {
   const { pending } = useFormStatus();
@@ -46,12 +51,14 @@ function PatientCard({ patient }: { patient: PatientData }) {
     );
 }
 
-function AppointmentCard({ appointment }: { appointment: PatientData['appointments'][0] }) {
+function AppointmentCard({ appointment, phone, onCancelSuccess }: { appointment: Appointment, phone: string, onCancelSuccess: (id: number) => void }) {
     const { t, language } = useTranslation();
+    const { toast } = useToast();
+    const [isCanceling, startCancelTransition] = useTransition();
+    const [isAlertOpen, setIsAlertOpen] = useState(false);
     const [formattedDate, setFormattedDate] = useState('');
 
     useEffect(() => {
-        // Format date on client to respect user's locale
         const dateObj = new Date(appointment.start);
         setFormattedDate(dateObj.toLocaleString(language === 'es' ? 'es-MX' : 'en-US', {
             dateStyle: 'full',
@@ -59,9 +66,28 @@ function AppointmentCard({ appointment }: { appointment: PatientData['appointmen
         }));
     }, [appointment.start, language]);
     
-    const handleActionClick = (action: 'cancel' | 'reschedule') => {
-        console.info("appointment_action", { action, appointmentId: appointment.appointmentId });
+    const handleCancelClick = () => {
+      setIsAlertOpen(true);
     };
+
+    const handleConfirmCancel = () => {
+      startCancelTransition(async () => {
+        const result = await cancelAppointment({
+          CalendarID: appointment.calendarId,
+          FechaCita: appointment.start,
+          ID_Doctor: Number(appointment.doctorId),
+          TelefonoUsuario: phone,
+        });
+
+        if (result.success) {
+          toast({ title: t('toast.cancel.success')});
+          onCancelSuccess(appointment.appointmentId);
+        } else {
+          toast({ variant: 'destructive', title: t('toast.cancel.error')});
+        }
+        setIsAlertOpen(false);
+      });
+    }
     
     const a11yCancelLabel = t('appt_a11y_cancel', {
         service: appointment.service,
@@ -75,8 +101,11 @@ function AppointmentCard({ appointment }: { appointment: PatientData['appointmen
         start: formattedDate
     });
 
+    const isCancelled = appointment.status.toLowerCase() === 'cancelada';
+
     return (
-        <Card className="shadow-md rounded-lg flex flex-col" data-appointment-id={appointment.appointmentId}>
+      <>
+        <Card className={cn("shadow-md rounded-lg flex flex-col transition-opacity", isCancelled && "opacity-60 bg-muted/50")} data-appointment-id={appointment.appointmentId}>
             <CardContent className="p-4 flex-grow flex flex-col">
                 <div className='flex-grow'>
                     <p className="font-bold text-lg text-primary">{appointment.service}</p>
@@ -93,7 +122,8 @@ function AppointmentCard({ appointment }: { appointment: PatientData['appointmen
                         className="w-full sm:w-auto min-w-28"
                         data-action="cancel"
                         aria-label={a11yCancelLabel}
-                        onClick={() => handleActionClick('cancel')}
+                        onClick={handleCancelClick}
+                        disabled={isCancelled}
                     >
                         {t('appt_actions_cancel')}
                     </Button>
@@ -103,7 +133,7 @@ function AppointmentCard({ appointment }: { appointment: PatientData['appointmen
                         className="w-full sm:w-auto min-w-28 btn-gradient"
                         data-action="reschedule"
                         aria-label={a11yRescheduleLabel}
-                        onClick={() => handleActionClick('reschedule')}
+                        disabled={isCancelled}
                     >
                         {t('appt_actions_reschedule')}
                     </Button>
@@ -111,6 +141,35 @@ function AppointmentCard({ appointment }: { appointment: PatientData['appointmen
                 <p className="text-xs text-gray-400 flex items-center gap-1 pt-2"><Hash className="w-3 h-3"/> {appointment.calendarId}</p>
             </CardContent>
         </Card>
+        
+        <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
+            <AlertDialogContent>
+                <AlertDialogHeader>
+                    <AlertDialogTitle>{t('cancel.title')}</AlertDialogTitle>
+                    <AlertDialogDescription>
+                        <div className="space-y-2 text-left py-2">
+                            <p><strong>{t('search_patient_info')}:</strong> {appointment.service}</p>
+                            <p><strong>Doctor ID:</strong> {appointment.doctorId}</p>
+                            <p><strong>Fecha y hora:</strong> {formattedDate}</p>
+                            <p><strong>Calendar ID:</strong> {appointment.calendarId}</p>
+                        </div>
+                    </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                    <AlertDialogCancel disabled={isCanceling}>{t('cancel.close')}</AlertDialogCancel>
+                    <AlertDialogAction
+                        onClick={handleConfirmCancel}
+                        disabled={isCanceling}
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        aria-label="Confirmar cancelación de la cita"
+                    >
+                        {isCanceling && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        {t('cancel.confirm')}
+                    </AlertDialogAction>
+                </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
+      </>
     )
 }
 
@@ -120,6 +179,27 @@ export default function PatientSearchPage() {
   
   const [countryCode, setCountryCode] = useState('52');
   const [phoneNumber, setPhoneNumber] = useState('');
+  const [patientData, setPatientData] = useState<PatientData | null>(null);
+
+  useEffect(() => {
+    if (state?.success && state.data) {
+      setPatientData(state.data);
+    } else if(state?.success && !state.data) {
+      setPatientData(null);
+    }
+  }, [state]);
+
+  const handleCancelSuccess = (appointmentId: number) => {
+    setPatientData(prevData => {
+      if (!prevData) return null;
+      return {
+        ...prevData,
+        appointments: prevData.appointments.map(app => 
+          app.appointmentId === appointmentId ? { ...app, status: 'Cancelada' } : app
+        ),
+      };
+    });
+  };
 
   const handleNumericInput = (setter: (value: string) => void, maxLength: number) => (e: React.ChangeEvent<HTMLInputElement>) => {
     const { value } = e.target;
@@ -180,18 +260,18 @@ export default function PatientSearchPage() {
                 </div>
             )}
 
-            {state?.success === true && state.data && (
+            {patientData && (
                 <>
-                    <PatientCard patient={state.data} />
+                    <PatientCard patient={patientData} />
                     <div className="mt-8 grid gap-4 md:grid-cols-2">
-                        {state.data.appointments.map(app => (
-                            <AppointmentCard key={app.appointmentId} appointment={app} />
+                        {patientData.appointments.map(app => (
+                            <AppointmentCard key={app.appointmentId} appointment={app} phone={patientData.phone} onCancelSuccess={handleCancelSuccess} />
                         ))}
                     </div>
                 </>
             )}
 
-            {state?.success === true && !state.data && (
+            {state?.success === true && !state.data && !patientData && (
                  <div className="text-center p-8 rounded-lg bg-secondary/50 text-muted-foreground font-medium">
                     {t('search_empty')}
                 </div>

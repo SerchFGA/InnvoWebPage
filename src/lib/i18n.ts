@@ -1,3 +1,4 @@
+
 export const translations = {
   en: {
     // Menu
@@ -43,12 +44,14 @@ export const translations = {
     step4Description: 'Your appointment with {{doctor}} on {{date}} at {{time}} has been successfully scheduled.',
     
     // Toasts & Errors
-    noTimeSlotsTitle: 'No Time Slots',
-    noTimeSlotsDescription: 'No available time slots for this doctor on the selected date.',
-    errorTitle: 'Oh no! Something went wrong.',
-    errorDescription: 'Unable to retrieve available hours. Please try again.',
-    unknownError: 'An unknown error occurred.',
-    missingInfo: 'Missing appointment information. Please go back.',
+    'noTimeSlotsTitle': 'No Time Slots',
+    'noTimeSlotsDescription': 'No available time slots for this doctor on the selected date.',
+    'errorTitle': 'Oh no! Something went wrong.',
+    'errorDescription': 'Unable to retrieve available hours. Please try again.',
+    'unknownError': 'An unknown error occurred.',
+    'missingInfo': 'Missing appointment information. Please go back.',
+    'toast.cancel.success': 'Appointment canceled successfully.',
+    'toast.cancel.error': 'Could not cancel appointment. Please try again.',
 
     // Form Validation
     fullNameMin: 'Full name must be at least 3 characters.',
@@ -73,6 +76,11 @@ export const translations = {
     appt_a11y_cancel: "Cancel appointment {{service}} with doctor {{doctorId}} on {{start}}.",
     appt_a11y_reschedule: "Reschedule appointment {{service}} with doctor {{doctorId}} on {{start}}.",
     
+    // Cancel Dialog
+    'cancel.title': 'Confirm Cancellation',
+    'cancel.confirm': 'Confirm',
+    'cancel.close': 'Close',
+
     // Footer
     footerAllRightsReserved: 'All rights reserved.',
     footerPrivacyPolicy: 'Privacy Policy',
@@ -124,12 +132,14 @@ export const translations = {
     step4Description: 'Tu cita con {{doctor}} el {{date}} a las {{time}} ha sido agendada exitosamente.',
     
     // Toasts & Errors
-    noTimeSlotsTitle: 'No hay Horarios Disponibles',
-    noTimeSlotsDescription: 'No hay horarios disponibles para este doctor en la fecha seleccionada.',
-    errorTitle: '¡Oh no! Algo salió mal.',
-    errorDescription: 'No se pudieron obtener los horarios disponibles. Por favor, intenta de nuevo.',
-    unknownError: 'Ocurrió un error desconocido.',
-    missingInfo: 'Falta información de la cita. Por favor, retrocede.',
+    'noTimeSlotsTitle': 'No hay Horarios Disponibles',
+    'noTimeSlotsDescription': 'No hay horarios disponibles para este doctor en la fecha seleccionada.',
+    'errorTitle': '¡Oh no! Algo salió mal.',
+    'errorDescription': 'No se pudieron obtener los horarios disponibles. Por favor, intenta de nuevo.',
+    'unknownError': 'Ocurrió un error desconocido.',
+    'missingInfo': 'Falta información de la cita. Por favor, retrocede.',
+    'toast.cancel.success': 'Cita cancelada correctamente.',
+    'toast.cancel.error': 'No se pudo cancelar la cita. Intenta de nuevo.',
     
     // Form Validation
     fullNameMin: 'El nombre completo debe tener al menos 3 caracteres.',
@@ -153,6 +163,11 @@ export const translations = {
     appt_actions_reschedule: "Reagendar",
     appt_a11y_cancel: "Cancelar cita {{service}} del doctor {{doctorId}} el {{start}}.",
     appt_a11y_reschedule: "Reagendar cita {{service}} del doctor {{doctorId}} el {{start}}.",
+
+    // Cancel Dialog
+    'cancel.title': 'Confirmar cancelación',
+    'cancel.confirm': 'Confirmar',
+    'cancel.close': 'Cerrar',
 
     // Footer
     footerAllRightsReserved: 'Todos los derechos reservados.',
