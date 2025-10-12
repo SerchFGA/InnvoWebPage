@@ -209,15 +209,17 @@ export async function cancelAppointment(
     });
 
     const durationMs = Date.now() - startTime;
-
+    
     if (!response.ok) {
-        console.error({ ...logPayload, event: 'cancel_response', ok: false, errorCode: 'webhook-error', status: response.status, durationMs });
+        const errorBody = await response.text();
+        console.error({ ...logPayload, event: 'cancel_response', ok: false, errorCode: 'webhook-error', status: response.status, statusText: response.statusText, body: errorBody, durationMs });
         return { success: false, error: 'server-error' };
     }
 
-    console.log({ ...logPayload, event: 'cancel_response', ok: true, durationMs });
-
+    console.log({ ...logPayload, event: 'cancel_response', ok: true, durationMs, status: response.status });
+    
     return { success: true };
+
   } catch (e) {
     const durationMs = Date.now() - startTime;
     console.error({ ...logPayload, event: 'cancel_response', ok: false, errorCode: 'exception', durationMs, message: (e instanceof Error) ? e.message : 'Unknown error' });

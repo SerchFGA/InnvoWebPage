@@ -146,13 +146,13 @@ function AppointmentCard({ appointment, phone, onCancelSuccess }: { appointment:
             <AlertDialogContent>
                 <AlertDialogHeader>
                     <AlertDialogTitle>{t('cancel.title')}</AlertDialogTitle>
-                    <AlertDialogDescription>
-                        <div className="space-y-2 text-left py-2">
-                            <p><strong>{t('search_patient_info')}:</strong> {appointment.service}</p>
-                            <p><strong>Doctor ID:</strong> {appointment.doctorId}</p>
-                            <p><strong>Fecha y hora:</strong> {formattedDate}</p>
-                            <p><strong>Calendar ID:</strong> {appointment.calendarId}</p>
-                        </div>
+                    <AlertDialogDescription asChild>
+                      <div className="space-y-2 text-left py-2">
+                        <div><strong>{t('search_patient_info')}:</strong> {appointment.service}</div>
+                        <div><strong>Doctor ID:</strong> {appointment.doctorId}</div>
+                        <div><strong>Fecha y hora:</strong> {formattedDate}</div>
+                        <div><strong>Calendar ID:</strong> {appointment.calendarId}</div>
+                      </div>
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
