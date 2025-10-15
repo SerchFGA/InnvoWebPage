@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useTransition, useEffect } from 'react';
@@ -134,7 +135,7 @@ export function RescheduleWizard({
   };
 
   const currentFormattedDate = format(parseISO(appointment.start), 'EEEE, d MMMM yyyy @ p', { locale: language === 'es' ? es : undefined });
-  const newFormattedDate = selectedDate && selectedTime ? format(selectedDate, 'EEEE, d MMMM yyyy', { locale: language === 'es' ? es : undefined }) + ` @ ${selectedTime}` : '';
+  const newFormattedDate = selectedDate && selectedTime ? format(new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate(), parse(selectedTime, 'p', new Date()).getHours(), parse(selectedTime, 'p', new Date()).getMinutes()), 'EEEE, d MMMM yyyy @ p', { locale: language === 'es' ? es : undefined }) : '';
 
 
   const renderStepContent = () => {
@@ -247,5 +248,3 @@ export function RescheduleWizard({
     </Dialog>
   );
 }
-
-    

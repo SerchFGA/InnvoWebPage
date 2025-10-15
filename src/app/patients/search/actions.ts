@@ -322,7 +322,7 @@ export async function rescheduleAppointment(
     }
 
     const result = await response.json().catch(() => ({}));
-    console.log({ ...logPayload, event: 'reschedule_response', ok: true, durationMs, status: response.status });
+    console.log({ ...logPayload, event: 'reschedule_response', ok: true, durationMs, status: response.status, body: result });
     
     return { success: true, data: { newCalendarId: result?.CalendarID } };
 
@@ -332,7 +332,3 @@ export async function rescheduleAppointment(
     return { success: false, error: 'server-error' };
   }
 }
-
-    
-
-    
