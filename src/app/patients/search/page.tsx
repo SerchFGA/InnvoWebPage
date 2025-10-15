@@ -52,7 +52,17 @@ function PatientCard({ patient }: { patient: PatientData }) {
     );
 }
 
-function AppointmentCard({ appointment, phone, onCancelSuccess, onRescheduleSuccess }: { appointment: Appointment, phone: string, onCancelSuccess: (id: number) => void, onRescheduleSuccess: (id: number, newDate: string, newCalendarId: string | undefined) => void }) {
+function AppointmentCard({ 
+  appointment, 
+  patientData, 
+  onCancelSuccess, 
+  onRescheduleSuccess 
+}: { 
+  appointment: Appointment, 
+  patientData: { patientName: string, phone: string }, 
+  onCancelSuccess: (id: number) => void, 
+  onRescheduleSuccess: (id: number, newDate: string, newCalendarId: string | undefined) => void 
+}) {
     const { t, language } = useTranslation();
     const { toast } = useToast();
     const [isCanceling, startCancelTransition] = useTransition();
@@ -78,7 +88,7 @@ function AppointmentCard({ appointment, phone, onCancelSuccess, onRescheduleSucc
           CalendarID: appointment.calendarId,
           FechaCita: appointment.start,
           ID_Doctor: Number(appointment.doctorId),
-          TelefonoUsuario: phone,
+          TelefonoUsuario: patientData.phone,
         });
 
         if (result.success) {
@@ -184,7 +194,7 @@ function AppointmentCard({ appointment, phone, onCancelSuccess, onRescheduleSucc
                 isOpen={rescheduleWizardOpen}
                 onOpenChange={setRescheduleWizardOpen}
                 appointment={appointment}
-                patientData={{ patientName: '', phone: phone, appointments: [] }}
+                patientData={{ patientName: patientData.patientName, phone: patientData.phone }}
                 onRescheduleSuccess={handleRescheduleSuccess}
             />
         )}
@@ -301,7 +311,7 @@ export default function PatientSearchPage() {
                             <AppointmentCard 
                                 key={app.appointmentId} 
                                 appointment={app} 
-                                phone={patientData.phone} 
+                                patientData={{ patientName: patientData.patientName, phone: patientData.phone }}
                                 onCancelSuccess={handleCancelSuccess} 
                                 onRescheduleSuccess={handleRescheduleSuccess}
                             />
@@ -321,5 +331,3 @@ export default function PatientSearchPage() {
     </div>
   );
 }
-
-    

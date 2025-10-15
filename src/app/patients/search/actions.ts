@@ -24,7 +24,7 @@ const rescheduleAppointmentSchema = z.object({
   ID_Doctor: z.number(),
   NombrePaciente: z.string().min(1),
   MotivoCita: z.string().nullable(),
-  FechaCitaNueva: z.string().min(1), // Expecting YYYY-MM-DDTHH:mm:ss format
+  FechaCitaNueva: z.string().min(1), // Expecting YYYY-MM-DDTHH:mm:ss-HH:mm format
 });
 
 const SEARCH_WEBHOOK_URL = 'https://devn8n.pixanai.com/webhook/GetUsersDatesInnvo';
@@ -239,6 +239,15 @@ export async function cancelAppointment(
 
     console.log({ ...logPayload, event: 'cancel_response', ok: true, durationMs, status: response.status });
     
+    // Handle 204 No Content or empty bodies as success
+    if (response.status === 204 || response.headers.get('content-length') === '0') {
+      return { success: true };
+    }
+    
+    // Try to parse JSON, but don't fail if it's not JSON
+    const result = await response.json().catch(() => ({}));
+    
+    // Success if status is 2xx
     return { success: true };
 
   } catch (e) {
@@ -276,7 +285,13 @@ export async function rescheduleAppointment(
     return { success: false, message: 'Too many requests. Please try again later.' };
   }
   
-  const validation = rescheduleAppointmentSchema.safeParse(appointmentData);
+  // Ensure ID_Doctor is a number before validation
+  const coercedData = {
+    ...appointmentData,
+    ID_Doctor: Number(appointmentData.ID_Doctor),
+  };
+
+  const validation = rescheduleAppointmentSchema.safeParse(coercedData);
 
   if (!validation.success) {
     console.error({ ...logPayload, event: 'reschedule_response', ok: false, errorCode: 'invalid-input', errors: validation.error.flatten(), durationMs: Date.now() - startTime });
@@ -284,13 +299,17 @@ export async function rescheduleAppointment(
   }
   
   try {
+    const payload = {
+        requestId,
+        ...validation.data
+    };
+
+    console.log("Reschedule Payload being sent:", JSON.stringify(payload, null, 2));
+
     const response = await fetch(RESCHEDULE_WEBHOOK_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        requestId,
-        ...validation.data
-      }),
+      body: JSON.stringify(payload),
       cache: 'no-store'
     });
 
@@ -308,6 +327,12 @@ export async function rescheduleAppointment(
         return { success: false, message: `Error ${response.status}: ${errorBody}` };
     }
 
+    // Handle 204 No Content or empty bodies as success
+    if (response.status === 204 || response.headers.get('content-length') === '0') {
+      console.log({ ...logPayload, event: 'reschedule_response', ok: true, durationMs, status: response.status, body: {} });
+      return { success: true, data: {} };
+    }
+
     const result = await response.json().catch(() => ({}));
     console.log({ ...logPayload, event: 'reschedule_response', ok: true, durationMs, status: response.status, body: result });
     
@@ -319,5 +344,3 @@ export async function rescheduleAppointment(
     return { success: false, message: 'An unexpected error occurred.' };
   }
 }
-
-    

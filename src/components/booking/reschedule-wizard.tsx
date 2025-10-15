@@ -14,7 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Loader2, ArrowLeft, ArrowRight } from 'lucide-react';
 import { useTranslation } from '@/contexts/language-context';
-import type { Appointment, PatientData } from '@/app/patients/search/page';
+import type { Appointment } from '@/app/patients/search/page';
 import { format, parse, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useToast } from '@/hooks/use-toast';
@@ -24,7 +24,10 @@ interface RescheduleWizardProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   appointment: Appointment;
-  patientData: PatientData;
+  patientData: {
+    patientName: string;
+    phone: string;
+  };
   onRescheduleSuccess: (appointmentId: number, newDate: string, newCalendarId: string | undefined) => void;
 }
 
@@ -117,15 +120,13 @@ export function RescheduleWizard({
     if (!selectedDate || !selectedTime) return;
 
     startRescheduleTransition(async () => {
-      // 1. Parse the selected time (e.g., "1:00 PM") into a Date object.
       const timeDate = parse(selectedTime, 'p', new Date());
-  
-      // 2. Combine the selected date with the hour and minute.
-      const newDateWithoutOffset = new Date(selectedDate);
-      newDateWithoutOffset.setHours(timeDate.getHours(), timeDate.getMinutes(), 0, 0);
       
-      // 3. Format this combined date into the required ISO-like string format for the backend.
-      const dateForBackend = format(newDateWithoutOffset, "yyyy-MM-dd'T'HH:mm:ss");
+      const newDateWithTime = new Date(selectedDate);
+      newDateWithTime.setHours(timeDate.getHours(), timeDate.getMinutes(), 0, 0);
+      
+      const offset = getOffsetFromISOString(appointment.start);
+      const dateForBackend = format(newDateWithTime, `yyyy-MM-dd'T'HH:mm:ss`) + offset;
 
       const result = await rescheduleAppointment({
         CalendarID: appointment.calendarId,
@@ -134,13 +135,13 @@ export function RescheduleWizard({
         ID_Doctor: Number(appointment.doctorId),
         NombrePaciente: patientData.patientName,
         MotivoCita: appointment.motive,
-        FechaCitaNueva: dateForBackend, // Pass the formatted string
+        FechaCitaNueva: dateForBackend,
       });
 
       if (result.success) {
         toast({ title: t('toast.reschedule.success')});
-        // We need to return an ISO string to update the parent state
-        const newIsoDateForUI = newDateWithoutOffset.toISOString();
+        // We need to return an ISO string with the correct offset to update the parent state
+        const newIsoDateForUI = newDateWithTime.toISOString().replace('Z', offset);
         onRescheduleSuccess(appointment.appointmentId, newIsoDateForUI, result.data?.newCalendarId);
       } else {
         const errorMessage = result.message || t('toast.reschedule.error');
@@ -263,5 +264,3 @@ export function RescheduleWizard({
     </Dialog>
   );
 }
-
-    
