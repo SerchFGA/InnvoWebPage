@@ -126,7 +126,7 @@ export function RescheduleWizard({
       newDateWithTime.setHours(timeDate.getHours(), timeDate.getMinutes(), 0, 0);
       
       const offset = getOffsetFromISOString(appointment.start);
-      const dateForBackend = format(newDateWithTime, `yyyy-MM-dd'T'HH:mm:ss`) + offset;
+      const dateForBackend = format(newDateWithTime, "yyyy-MM-dd'T'HH:mm:ss") + offset;
 
       const payload = {
         CalendarID: appointment.calendarId,
@@ -142,8 +142,9 @@ export function RescheduleWizard({
 
       if (result.success) {
         toast({ title: t('toast.reschedule.success')});
-        const newIsoDateForUI = newDateWithTime.toISOString().replace('Z', offset);
-        onRescheduleSuccess(appointment.appointmentId, newIsoDateForUI, result.data?.newCalendarId);
+        // Use the backend-formatted string directly for UI consistency on update
+        const newDateForUI = dateForBackend;
+        onRescheduleSuccess(appointment.appointmentId, newDateForUI, result.data?.newCalendarId);
       } else {
         const errorMessage = result.message || t('toast.reschedule.error');
         toast({ variant: 'destructive', title: 'Error al reagendar', description: errorMessage });
@@ -163,7 +164,7 @@ export function RescheduleWizard({
             <DialogHeader>
               <DialogTitle>{t('reschedule.step1.title')}</DialogTitle>
               <DialogDescription>
-                {t('step2Description')} {appointment.service}
+                {t('step1Description')} {appointment.service}
               </DialogDescription>
             </DialogHeader>
             <div className="flex flex-col items-center py-4">
@@ -265,5 +266,3 @@ export function RescheduleWizard({
     </Dialog>
   );
 }
-
-    

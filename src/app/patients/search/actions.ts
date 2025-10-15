@@ -13,19 +13,20 @@ const patientSearchSchema = z.object({
 const cancelAppointmentSchema = z.object({
   CalendarID: z.string().min(1),
   FechaCita: z.string().min(1),
-  TelefonoUsuario: z.string().regex(/^\d{11,14}$/),
+  TelefonoUsuario: z.string().regex(/^\+?\d{11,15}$/),
   ID_Doctor: z.number(),
 });
 
 const rescheduleAppointmentSchema = z.object({
-  CalendarID: z.string().min(1),
-  FechaCitaCancelar: z.string().min(1),
-  TelefonoUsuario: z.string().regex(/^\d{11,14}$/),
-  ID_Doctor: z.number(),
-  NombrePaciente: z.string().min(1),
+  CalendarID: z.string().min(1, "CalendarID is required"),
+  FechaCitaCancelar: z.string().min(1, "FechaCitaCancelar is required"),
+  TelefonoUsuario: z.string().regex(/^\+?\d{11,15}$/, "Invalid phone number format"),
+  ID_Doctor: z.number({ required_error: "ID_Doctor is required" }),
+  NombrePaciente: z.string().min(1, "NombrePaciente is required"),
   MotivoCita: z.string().nullable(),
-  FechaCitaNueva: z.string().min(1), // Expecting YYYY-MM-DDTHH:mm:ss-HH:mm format
+  FechaCitaNueva: z.string().min(1, "FechaCitaNueva is required"), // Expecting YYYY-MM-DDTHH:mm:ss-HH:mm format
 });
+
 
 const SEARCH_WEBHOOK_URL = process.env.N8N_PATIENT_SEARCH_WEBHOOK_URL;
 const CANCEL_WEBHOOK_URL = process.env.N8N_CANCEL_APPOINTMENT_WEBHOOK_URL;
@@ -139,7 +140,7 @@ export async function searchPatientByPhone(
     return { success: false, error: 'invalid-input' };
   }
 
-  const fullPhone = `${validation.data.countryCode}1${validation.data.phoneNumber}`;
+  const fullPhone = `+${validation.data.countryCode}1${validation.data.phoneNumber}`;
   
   try {
     const response = await fetch(SEARCH_WEBHOOK_URL, {
@@ -273,6 +274,8 @@ export async function rescheduleAppointment(
   const session = await getSession();
   const requestId = randomUUID();
   const startTime = Date.now();
+
+  console.log("DEBUG: Received data in rescheduleAppointment action:", JSON.stringify(appointmentData));
   
   const logPayload = {
       event: 'reschedule_request',
@@ -302,8 +305,9 @@ export async function rescheduleAppointment(
   const validation = rescheduleAppointmentSchema.safeParse(appointmentData);
 
   if (!validation.success) {
+    const errorMessage = "Invalid input data.";
     console.error({ ...logPayload, event: 'reschedule_response', ok: false, errorCode: 'invalid-input', errors: validation.error.flatten(), durationMs: Date.now() - startTime });
-    return { success: false, message: 'Invalid input data.' };
+    return { success: false, message: `${errorMessage} Details: ${JSON.stringify(validation.error.flatten())}` };
   }
   
   try {
