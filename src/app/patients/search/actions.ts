@@ -17,8 +17,20 @@ const cancelAppointmentSchema = z.object({
   ID_Doctor: z.number(),
 });
 
+const rescheduleAppointmentSchema = z.object({
+  CalendarID: z.string().min(1),
+  FechaCitaCancelar: z.string().min(1),
+  TelefonoUsuario: z.string().regex(/^\d{11,14}$/),
+  ID_Doctor: z.number(),
+  NombrePaciente: z.string().min(1),
+  MotivoCita: z.string().nullable(),
+  FechaCitaNueva: z.string().datetime(),
+});
+
 const SEARCH_WEBHOOK_URL = 'https://devn8n.pixanai.com/webhook/GetUsersDatesInnvo';
 const CANCEL_WEBHOOK_URL = 'https://devn8n.pixanai.com/webhook/CancelAppointmentInnvo';
+const RESCHEDULE_WEBHOOK_URL = 'https://devn8n.pixanai.com/webhook/ReSchedulingAppointmentInnvo';
+
 
 export type PatientData = {
   patientName: string;
@@ -48,6 +60,15 @@ export type CancelResult = {
   success: false;
   error: 'invalid-input' | 'server-error' | 'rate-limited';
 };
+
+export type RescheduleResult = {
+  success: true;
+  data?: { newCalendarId?: string };
+} | {
+  success: false;
+  error: 'invalid-input' | 'server-error' | 'rate-limited';
+};
+
 
 // Simple in-memory store for rate limiting
 const requestCounts = new Map<string, { count: number, start: number }>();
@@ -218,6 +239,25 @@ export async function cancelAppointment(
 
     console.log({ ...logPayload, event: 'cancel_response', ok: true, durationMs, status: response.status });
     
+    // Handle empty response body for success cases (e.g., 204 No Content)
+    const contentType = response.headers.get("content-type");
+    if (response.status === 204 || !contentType || !contentType.includes("application/json")) {
+        return { success: true };
+    }
+    
+    // Safely parse JSON
+    const result = await response.json().catch(() => null);
+
+    // If parsing fails but status is 2xx, still treat as success
+    if (result === null) {
+      return { success: true };
+    }
+
+    // If JSON is parsed, check for an explicit success flag, otherwise default to success on 2xx
+    if (result && typeof result.ok === 'boolean' && !result.ok) {
+      return { success: false, error: 'server-error' };
+    }
+
     return { success: true };
 
   } catch (e) {
@@ -226,3 +266,71 @@ export async function cancelAppointment(
     return { success: false, error: 'server-error' };
   }
 }
+
+export async function rescheduleAppointment(
+  appointmentData: z.infer<typeof rescheduleAppointmentSchema>
+): Promise<RescheduleResult> {
+  const session = await getSession();
+  const requestId = randomUUID();
+  const startTime = Date.now();
+
+  const logPayload = {
+      event: 'reschedule_request',
+      requestId,
+      user: session.username,
+      calendarId: appointmentData.CalendarID,
+      doctorId: appointmentData.ID_Doctor,
+      phoneLast4: appointmentData.TelefonoUsuario.slice(-4),
+  };
+  console.log(JSON.stringify(logPayload));
+  
+  if (!session.isLoggedIn || !session.username) {
+    console.error({ ...logPayload, event: 'reschedule_response', ok: false, errorCode: 'unauthenticated', durationMs: Date.now() - startTime });
+    return { success: false, error: 'server-error' };
+  }
+
+  const isRescheduleAllowed = await checkRateLimit(`reschedule:${session.username}`, 5, 60 * 1000); // 5 per minute
+  if (!isRescheduleAllowed) {
+    console.warn({ ...logPayload, event: 'reschedule_response', ok: false, errorCode: 'rate-limited', durationMs: Date.now() - startTime });
+    return { success: false, error: 'rate-limited' };
+  }
+  
+  const validation = rescheduleAppointmentSchema.safeParse(appointmentData);
+
+  if (!validation.success) {
+    console.error({ ...logPayload, event: 'reschedule_response', ok: false, errorCode: 'invalid-input', errors: validation.error.flatten(), durationMs: Date.now() - startTime });
+    return { success: false, error: 'invalid-input' };
+  }
+  
+  try {
+    const response = await fetch(RESCHEDULE_WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        requestId,
+        ...validation.data
+      }),
+      cache: 'no-store'
+    });
+
+    const durationMs = Date.now() - startTime;
+
+    if (!response.ok) {
+        const errorBody = await response.text();
+        console.error({ ...logPayload, event: 'reschedule_response', ok: false, errorCode: 'webhook-error', status: response.status, body: errorBody, durationMs });
+        return { success: false, error: 'server-error' };
+    }
+
+    const result = await response.json().catch(() => ({}));
+    console.log({ ...logPayload, event: 'reschedule_response', ok: true, durationMs, status: response.status });
+    
+    return { success: true, data: { newCalendarId: result?.CalendarID } };
+
+  } catch (e) {
+    const durationMs = Date.now() - startTime;
+    console.error({ ...logPayload, event: 'reschedule_response', ok: false, errorCode: 'exception', durationMs, message: (e instanceof Error) ? e.message : 'Unknown error' });
+    return { success: false, error: 'server-error' };
+  }
+}
+
+    

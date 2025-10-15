@@ -15,8 +15,9 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { searchPatientByPhone, cancelAppointment, type PatientData } from './actions';
+import { RescheduleWizard } from '@/components/booking/reschedule-wizard';
 
-type Appointment = PatientData['appointments'][0];
+export type Appointment = PatientData['appointments'][0];
 
 function SubmitButton({ disabled }: { disabled: boolean }) {
   const { pending } = useFormStatus();
@@ -51,12 +52,13 @@ function PatientCard({ patient }: { patient: PatientData }) {
     );
 }
 
-function AppointmentCard({ appointment, phone, onCancelSuccess }: { appointment: Appointment, phone: string, onCancelSuccess: (id: number) => void }) {
+function AppointmentCard({ appointment, phone, onCancelSuccess, onRescheduleSuccess }: { appointment: Appointment, phone: string, onCancelSuccess: (id: number) => void, onRescheduleSuccess: (id: number, newDate: string, newCalendarId: string | undefined) => void }) {
     const { t, language } = useTranslation();
     const { toast } = useToast();
     const [isCanceling, startCancelTransition] = useTransition();
     const [isAlertOpen, setIsAlertOpen] = useState(false);
     const [formattedDate, setFormattedDate] = useState('');
+    const [rescheduleWizardOpen, setRescheduleWizardOpen] = useState(false);
 
     useEffect(() => {
         const dateObj = new Date(appointment.start);
@@ -83,10 +85,16 @@ function AppointmentCard({ appointment, phone, onCancelSuccess }: { appointment:
           toast({ title: t('toast.cancel.success')});
           onCancelSuccess(appointment.appointmentId);
         } else {
-          toast({ variant: 'destructive', title: t('toast.cancel.error')});
+          const errorMessage = result.error === 'rate-limited' ? 'Demasiadas solicitudes, intente más tarde.' : t('toast.cancel.error');
+          toast({ variant: 'destructive', title: errorMessage });
         }
         setIsAlertOpen(false);
       });
+    }
+
+    const handleRescheduleSuccess = (newDate: string, newCalendarId: string | undefined) => {
+        onRescheduleSuccess(appointment.appointmentId, newDate, newCalendarId);
+        setRescheduleWizardOpen(false);
     }
     
     const a11yCancelLabel = t('appt_a11y_cancel', {
@@ -134,6 +142,7 @@ function AppointmentCard({ appointment, phone, onCancelSuccess }: { appointment:
                         data-action="reschedule"
                         aria-label={a11yRescheduleLabel}
                         disabled={isCancelled}
+                        onClick={() => setRescheduleWizardOpen(true)}
                     >
                         {t('appt_actions_reschedule')}
                     </Button>
@@ -169,6 +178,16 @@ function AppointmentCard({ appointment, phone, onCancelSuccess }: { appointment:
                 </AlertDialogFooter>
             </AlertDialogContent>
         </AlertDialog>
+
+        {rescheduleWizardOpen && (
+            <RescheduleWizard 
+                isOpen={rescheduleWizardOpen}
+                onOpenChange={setRescheduleWizardOpen}
+                appointment={appointment}
+                patientData={{ patientName: '', phone: phone, appointments: [] }}
+                onRescheduleSuccess={handleRescheduleSuccess}
+            />
+        )}
       </>
     )
 }
@@ -198,6 +217,20 @@ export default function PatientSearchPage() {
           app.appointmentId === appointmentId ? { ...app, status: 'Cancelada' } : app
         ),
       };
+    });
+  };
+
+  const handleRescheduleSuccess = (appointmentId: number, newDate: string, newCalendarId: string | undefined) => {
+    setPatientData(prevData => {
+        if (!prevData) return null;
+        return {
+            ...prevData,
+            appointments: prevData.appointments.map(app => 
+                app.appointmentId === appointmentId 
+                ? { ...app, start: newDate, calendarId: newCalendarId ?? app.calendarId } 
+                : app
+            ),
+        };
     });
   };
 
@@ -265,7 +298,13 @@ export default function PatientSearchPage() {
                     <PatientCard patient={patientData} />
                     <div className="mt-8 grid gap-4 md:grid-cols-2">
                         {patientData.appointments.map(app => (
-                            <AppointmentCard key={app.appointmentId} appointment={app} phone={patientData.phone} onCancelSuccess={handleCancelSuccess} />
+                            <AppointmentCard 
+                                key={app.appointmentId} 
+                                appointment={app} 
+                                phone={patientData.phone} 
+                                onCancelSuccess={handleCancelSuccess} 
+                                onRescheduleSuccess={handleRescheduleSuccess}
+                            />
                         ))}
                     </div>
                 </>
@@ -282,3 +321,5 @@ export default function PatientSearchPage() {
     </div>
   );
 }
+
+    

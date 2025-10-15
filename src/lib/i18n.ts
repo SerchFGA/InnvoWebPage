@@ -52,6 +52,8 @@ export const translations = {
     'missingInfo': 'Missing appointment information. Please go back.',
     'toast.cancel.success': 'Appointment canceled successfully.',
     'toast.cancel.error': 'Could not cancel appointment. Please try again.',
+    'toast.reschedule.success': 'Appointment rescheduled successfully.',
+    'toast.reschedule.error': 'Could not reschedule. Please try another time.',
 
     // Form Validation
     fullNameMin: 'Full name must be at least 3 characters.',
@@ -80,6 +82,16 @@ export const translations = {
     'cancel.title': 'Confirm Cancellation',
     'cancel.confirm': 'Confirm',
     'cancel.close': 'Close',
+
+    // Reschedule Wizard
+    'reschedule.title': 'Reschedule Appointment',
+    'reschedule.step1.title': 'Select a new date',
+    'reschedule.step2.title': 'Select a new time',
+    'reschedule.step3.title': 'Confirm Change',
+    'reschedule.summary.current': 'Current',
+    'reschedule.summary.new': 'New',
+    'reschedule.confirm': 'Confirm',
+    'reschedule.back': 'Back',
 
     // Footer
     footerAllRightsReserved: 'All rights reserved.',
@@ -140,6 +152,9 @@ export const translations = {
     'missingInfo': 'Falta información de la cita. Por favor, retrocede.',
     'toast.cancel.success': 'Cita cancelada correctamente.',
     'toast.cancel.error': 'No se pudo cancelar la cita. Intenta de nuevo.',
+    'toast.reschedule.success': 'Cita reagendada correctamente.',
+    'toast.reschedule.error': 'No se pudo reagendar, intenta otra hora.',
+
     
     // Form Validation
     fullNameMin: 'El nombre completo debe tener al menos 3 caracteres.',
@@ -169,6 +184,16 @@ export const translations = {
     'cancel.confirm': 'Confirmar',
     'cancel.close': 'Cerrar',
 
+    // Reschedule Wizard
+    'reschedule.title': 'Reagendar cita',
+    'reschedule.step1.title': 'Selecciona una fecha',
+    'reschedule.step2.title': 'Selecciona un horario',
+    'reschedule.step3.title': 'Confirma el cambio',
+    'reschedule.summary.current': 'Actual',
+    'reschedule.summary.new': 'Nueva',
+    'reschedule.confirm': 'Confirmar',
+    'reschedule.back': 'Atrás',
+
     // Footer
     footerAllRightsReserved: 'Todos los derechos reservados.',
     footerPrivacyPolicy: 'Política de Privacidad',
@@ -180,3 +205,5 @@ export const translations = {
 
 export type TranslationKey = keyof typeof translations.en;
 export type InterpolationData = { [key: string]: string | number };
+
+    
