@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useTransition, useEffect } from 'react';
@@ -127,7 +128,7 @@ export function RescheduleWizard({
       const offset = getOffsetFromISOString(appointment.start);
       const dateForBackend = format(newDateWithTime, `yyyy-MM-dd'T'HH:mm:ss`) + offset;
 
-      const result = await rescheduleAppointment({
+      const payload = {
         CalendarID: appointment.calendarId,
         FechaCitaCancelar: appointment.start,
         TelefonoUsuario: patientData.phone,
@@ -135,11 +136,12 @@ export function RescheduleWizard({
         NombrePaciente: patientData.patientName,
         MotivoCita: appointment.motive,
         FechaCitaNueva: dateForBackend,
-      });
+      };
+
+      const result = await rescheduleAppointment(payload);
 
       if (result.success) {
         toast({ title: t('toast.reschedule.success')});
-        // We need to return an ISO string with the correct offset to update the parent state
         const newIsoDateForUI = newDateWithTime.toISOString().replace('Z', offset);
         onRescheduleSuccess(appointment.appointmentId, newIsoDateForUI, result.data?.newCalendarId);
       } else {
@@ -150,7 +152,7 @@ export function RescheduleWizard({
   };
 
   const currentFormattedDate = format(parseISO(appointment.start), 'EEEE, d MMMM yyyy @ p', { locale: language === 'es' ? es : undefined });
-  const newFormattedDate = selectedDate && selectedTime ? format(new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate(), parse(selectedTime, 'p', new Date()).getHours(), parse(selectedTime, 'p', new Date()).getMinutes()), 'EEEE, d MMMM yyyy @ p', { locale: language === 'es' ? es : undefined }) : '';
+  const newFormattedDate = selectedDate && selectedTime ? format(new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate(), parse(selectedTime, 'p', new Date()).getHours(), parse(selectedTime, 'p', new Date()).getMinutes()), 'EEEE, d MMMM y-yy @ p', { locale: language === 'es' ? es : undefined }) : '';
 
 
   const renderStepContent = () => {
@@ -230,14 +232,14 @@ export function RescheduleWizard({
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={prevStep} disabled={isSubmitting}>
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                {t('backButton')}
-              </Button>
-              <Button onClick={handleConfirmReschedule} disabled={isSubmitting} className="btn-gradient">
-                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {t('reschedule.confirm')}
-              </Button>
+                <Button variant="outline" onClick={prevStep} disabled={isSubmitting}>
+                    <ArrowLeft className="mr-2 h-4 w-4" />
+                    {t('backButton')}
+                </Button>
+                <Button onClick={handleConfirmReschedule} disabled={!selectedDate || !selectedTime || isSubmitting} className="btn-gradient">
+                    {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    {t('reschedule.confirm')}
+                </Button>
             </DialogFooter>
           </>
         );

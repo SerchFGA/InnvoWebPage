@@ -273,7 +273,7 @@ export async function rescheduleAppointment(
   const session = await getSession();
   const requestId = randomUUID();
   const startTime = Date.now();
-
+  
   const logPayload = {
       event: 'reschedule_request',
       requestId,
@@ -299,13 +299,7 @@ export async function rescheduleAppointment(
     return { success: false, message: 'Too many requests. Please try again later.' };
   }
   
-  // Ensure ID_Doctor is a number before validation
-  const coercedData = {
-    ...appointmentData,
-    ID_Doctor: Number(appointmentData.ID_Doctor),
-  };
-
-  const validation = rescheduleAppointmentSchema.safeParse(coercedData);
+  const validation = rescheduleAppointmentSchema.safeParse(appointmentData);
 
   if (!validation.success) {
     console.error({ ...logPayload, event: 'reschedule_response', ok: false, errorCode: 'invalid-input', errors: validation.error.flatten(), durationMs: Date.now() - startTime });
@@ -317,7 +311,7 @@ export async function rescheduleAppointment(
         requestId,
         ...validation.data
     };
-
+    
     console.log("Reschedule request payload:", JSON.stringify(logPayload));
 
     const response = await fetch(RESCHEDULE_WEBHOOK_URL, {
@@ -358,5 +352,4 @@ export async function rescheduleAppointment(
     return { success: false, message: 'An unexpected error occurred.' };
   }
 }
-
     
