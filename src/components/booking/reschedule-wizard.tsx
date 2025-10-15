@@ -28,6 +28,16 @@ interface RescheduleWizardProps {
   onRescheduleSuccess: (appointmentId: number, newDate: string, newCalendarId: string | undefined) => void;
 }
 
+function getOffsetFromISOString(dateString: string): string {
+    const match = dateString.match(/([+-]\d{2}:\d{2})$/);
+    if (match) {
+        return match[1];
+    }
+    // Default to Mexico City if no offset is found
+    return '-06:00';
+}
+
+
 export function RescheduleWizard({
   isOpen,
   onOpenChange,
@@ -107,12 +117,15 @@ export function RescheduleWizard({
     if (!selectedDate || !selectedTime) return;
 
     startRescheduleTransition(async () => {
-      // Create a date object from the selected time string (e.g., "1:00 PM")
+      // 1. Parse the selected time (e.g., "1:00 PM") into a Date object.
       const timeDate = parse(selectedTime, 'p', new Date());
-
-      // Create the new appointment date by combining the selected date with the hour and minute from the time
-      const newDate = new Date(selectedDate);
-      newDate.setHours(timeDate.getHours(), timeDate.getMinutes(), 0, 0);
+  
+      // 2. Combine the selected date with the hour and minute.
+      const newDateWithoutOffset = new Date(selectedDate);
+      newDateWithoutOffset.setHours(timeDate.getHours(), timeDate.getMinutes(), 0, 0);
+      
+      // 3. Format this combined date into the required ISO-like string format for the backend.
+      const dateForBackend = format(newDateWithoutOffset, "yyyy-MM-dd'T'HH:mm:ss");
 
       const result = await rescheduleAppointment({
         CalendarID: appointment.calendarId,
@@ -121,15 +134,17 @@ export function RescheduleWizard({
         ID_Doctor: Number(appointment.doctorId),
         NombrePaciente: patientData.patientName,
         MotivoCita: appointment.motive,
-        FechaCitaNueva: newDate.toISOString(),
+        FechaCitaNueva: dateForBackend, // Pass the formatted string
       });
 
       if (result.success) {
         toast({ title: t('toast.reschedule.success')});
-        onRescheduleSuccess(appointment.appointmentId, newDate.toISOString(), result.data?.newCalendarId);
+        // We need to return an ISO string to update the parent state
+        const newIsoDateForUI = newDateWithoutOffset.toISOString();
+        onRescheduleSuccess(appointment.appointmentId, newIsoDateForUI, result.data?.newCalendarId);
       } else {
-        const errorMessage = result.error === 'rate-limited' ? 'Demasiadas solicitudes, intente más tarde.' : t('toast.reschedule.error');
-        toast({ variant: 'destructive', title: errorMessage });
+        const errorMessage = result.message || t('toast.reschedule.error');
+        toast({ variant: 'destructive', title: 'Error al reagendar', description: errorMessage });
       }
     });
   };
@@ -248,3 +263,5 @@ export function RescheduleWizard({
     </Dialog>
   );
 }
+
+    

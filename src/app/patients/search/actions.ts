@@ -24,7 +24,7 @@ const rescheduleAppointmentSchema = z.object({
   ID_Doctor: z.number(),
   NombrePaciente: z.string().min(1),
   MotivoCita: z.string().nullable(),
-  FechaCitaNueva: z.string().datetime(),
+  FechaCitaNueva: z.string().min(1), // Expecting YYYY-MM-DDTHH:mm:ss format
 });
 
 const SEARCH_WEBHOOK_URL = 'https://devn8n.pixanai.com/webhook/GetUsersDatesInnvo';
@@ -66,7 +66,7 @@ export type RescheduleResult = {
   data?: { newCalendarId?: string };
 } | {
   success: false;
-  error: 'invalid-input' | 'server-error' | 'rate-limited';
+  message?: string;
 };
 
 
@@ -239,25 +239,6 @@ export async function cancelAppointment(
 
     console.log({ ...logPayload, event: 'cancel_response', ok: true, durationMs, status: response.status });
     
-    // Handle empty response body for success cases (e.g., 204 No Content)
-    const contentType = response.headers.get("content-type");
-    if (response.status === 204 || !contentType || !contentType.includes("application/json")) {
-        return { success: true };
-    }
-    
-    // Safely parse JSON
-    const result = await response.json().catch(() => null);
-
-    // If parsing fails but status is 2xx, still treat as success
-    if (result === null) {
-      return { success: true };
-    }
-
-    // If JSON is parsed, check for an explicit success flag, otherwise default to success on 2xx
-    if (result && typeof result.ok === 'boolean' && !result.ok) {
-      return { success: false, error: 'server-error' };
-    }
-
     return { success: true };
 
   } catch (e) {
@@ -286,20 +267,20 @@ export async function rescheduleAppointment(
   
   if (!session.isLoggedIn || !session.username) {
     console.error({ ...logPayload, event: 'reschedule_response', ok: false, errorCode: 'unauthenticated', durationMs: Date.now() - startTime });
-    return { success: false, error: 'server-error' };
+    return { success: false, message: 'Authentication required' };
   }
 
   const isRescheduleAllowed = await checkRateLimit(`reschedule:${session.username}`, 5, 60 * 1000); // 5 per minute
   if (!isRescheduleAllowed) {
     console.warn({ ...logPayload, event: 'reschedule_response', ok: false, errorCode: 'rate-limited', durationMs: Date.now() - startTime });
-    return { success: false, error: 'rate-limited' };
+    return { success: false, message: 'Too many requests. Please try again later.' };
   }
   
   const validation = rescheduleAppointmentSchema.safeParse(appointmentData);
 
   if (!validation.success) {
     console.error({ ...logPayload, event: 'reschedule_response', ok: false, errorCode: 'invalid-input', errors: validation.error.flatten(), durationMs: Date.now() - startTime });
-    return { success: false, error: 'invalid-input' };
+    return { success: false, message: 'Invalid input data.' };
   }
   
   try {
@@ -316,9 +297,15 @@ export async function rescheduleAppointment(
     const durationMs = Date.now() - startTime;
 
     if (!response.ok) {
-        const errorBody = await response.text();
+        let errorBody = await response.text();
+        try {
+            const jsonError = JSON.parse(errorBody);
+            errorBody = jsonError.message || errorBody;
+        } catch (e) {
+            // Not a JSON response
+        }
         console.error({ ...logPayload, event: 'reschedule_response', ok: false, errorCode: 'webhook-error', status: response.status, body: errorBody, durationMs });
-        return { success: false, error: 'server-error' };
+        return { success: false, message: `Error ${response.status}: ${errorBody}` };
     }
 
     const result = await response.json().catch(() => ({}));
@@ -329,6 +316,8 @@ export async function rescheduleAppointment(
   } catch (e) {
     const durationMs = Date.now() - startTime;
     console.error({ ...logPayload, event: 'reschedule_response', ok: false, errorCode: 'exception', durationMs, message: (e instanceof Error) ? e.message : 'Unknown error' });
-    return { success: false, error: 'server-error' };
+    return { success: false, message: 'An unexpected error occurred.' };
   }
 }
+
+    
