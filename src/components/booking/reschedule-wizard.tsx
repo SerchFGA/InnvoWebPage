@@ -152,7 +152,7 @@ export function RescheduleWizard({
   };
 
   const currentFormattedDate = format(parseISO(appointment.start), 'EEEE, d MMMM yyyy @ p', { locale: language === 'es' ? es : undefined });
-  const newFormattedDate = selectedDate && selectedTime ? format(new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate(), parse(selectedTime, 'p', new Date()).getHours(), parse(selectedTime, 'p', new Date()).getMinutes()), 'EEEE, d MMMM y-yy @ p', { locale: language === 'es' ? es : undefined }) : '';
+  const newFormattedDate = selectedDate && selectedTime ? format(new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate(), parse(selectedTime, 'p', new Date()).getHours(), parse(selectedTime, 'p', new Date()).getMinutes()), 'EEEE, d MMMM yyyy @ p', { locale: language === 'es' ? es : undefined }) : '';
 
 
   const renderStepContent = () => {
@@ -265,3 +265,5 @@ export function RescheduleWizard({
     </Dialog>
   );
 }
+
+    
