@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useTransition, useEffect } from 'react';
@@ -15,7 +14,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Loader2, ArrowLeft, ArrowRight } from 'lucide-react';
 import { useTranslation } from '@/contexts/language-context';
 import type { Appointment, PatientData } from '@/app/patients/search/page';
-import { format, parseISO } from 'date-fns';
+import { format, parse, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useToast } from '@/hooks/use-toast';
 import { rescheduleAppointment } from '@/app/patients/search/actions';
@@ -51,9 +50,8 @@ export function RescheduleWizard({
 
   const N8N_AVAILABLE_TIMES_WEBHOOK_URL = process.env.NEXT_PUBLIC_N8N_AVAILABLE_TIMES_WEBHOOK_URL;
 
-  const handleDateSelect = async (date: Date | undefined) => {
-    if (!date) return;
-    setSelectedDate(date);
+  const handleFetchTimes = async () => {
+    if (!selectedDate) return;
     setIsFetchingTimes(true);
     setSelectedTime(null);
     setAvailableTimes([]);
@@ -70,7 +68,7 @@ export function RescheduleWizard({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           doctor_id: Number(appointment.doctorId),
-          Fecha: format(date, 'yyyy-MM-dd'),
+          Fecha: format(selectedDate, 'yyyy-MM-dd'),
         }),
       });
 
@@ -108,20 +106,12 @@ export function RescheduleWizard({
     if (!selectedDate || !selectedTime) return;
 
     startRescheduleTransition(async () => {
-      const [hour, minutePart] = selectedTime.split(':');
-      const [minute] = minutePart.split(' ');
-      const isPM = selectedTime.includes('PM');
+      // Create a date object from the selected time string (e.g., "1:00 PM")
+      const timeDate = parse(selectedTime, 'p', new Date());
 
-      let hour24 = parseInt(hour, 10);
-      if (isPM && hour24 !== 12) {
-        hour24 += 12;
-      }
-      if (!isPM && hour24 === 12) {
-        hour24 = 0;
-      }
-      
+      // Create the new appointment date by combining the selected date with the hour and minute from the time
       const newDate = new Date(selectedDate);
-      newDate.setHours(hour24, parseInt(minute, 10), 0, 0);
+      newDate.setHours(timeDate.getHours(), timeDate.getMinutes(), 0, 0);
 
       const result = await rescheduleAppointment({
         CalendarID: appointment.calendarId,
@@ -137,7 +127,8 @@ export function RescheduleWizard({
         toast({ title: t('toast.reschedule.success')});
         onRescheduleSuccess(appointment.appointmentId, newDate.toISOString(), result.data?.newCalendarId);
       } else {
-        toast({ variant: 'destructive', title: t('toast.reschedule.error') });
+        const errorMessage = result.error === 'rate-limited' ? 'Demasiadas solicitudes, intente más tarde.' : t('toast.reschedule.error');
+        toast({ variant: 'destructive', title: errorMessage });
       }
     });
   };
@@ -157,16 +148,25 @@ export function RescheduleWizard({
                 {t('step2Description')} {appointment.service}
               </DialogDescription>
             </DialogHeader>
-            <div className="flex justify-center py-4">
+            <div className="flex flex-col items-center py-4">
               <Calendar
                 mode="single"
                 selected={selectedDate}
-                onSelect={handleDateSelect}
+                onSelect={setSelectedDate}
                 disabled={(date) => date < new Date(new Date().setDate(new Date().getDate() - 1)) || date.getDay() === 0}
                 initialFocus
               />
             </div>
-            {isFetchingTimes && <div className="flex justify-center items-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>}
+            <DialogFooter>
+              <Button
+                  onClick={handleFetchTimes}
+                  disabled={!selectedDate || isFetchingTimes}
+                  className="w-full btn-gradient"
+              >
+                  {isFetchingTimes ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ArrowRight className="mr-2 h-4 w-4" />}
+                  {t('continueButton')}
+              </Button>
+            </DialogFooter>
           </>
         );
       case 2:
@@ -198,12 +198,20 @@ export function RescheduleWizard({
           <>
             <DialogHeader>
               <DialogTitle>{t('reschedule.step3.title')}</DialogTitle>
+              <DialogDescription>
+                  Confirma los detalles para reagendar la cita de <strong>{patientData.patientName}</strong> ({patientData.phone}).
+              </DialogDescription>
             </DialogHeader>
-            <div className="grid grid-cols-2 gap-4 py-4">
-                <div className="font-semibold">{t('reschedule.summary.current')}:</div>
-                <div>{currentFormattedDate}</div>
-                <div className="font-semibold">{t('reschedule.summary.new')}:</div>
-                <div>{newFormattedDate}</div>
+            <div className="space-y-4 py-4">
+              <div className="p-4 border rounded-lg">
+                <h4 className="font-semibold text-center mb-2">{t('reschedule.summary.current')}</h4>
+                <p className="text-sm text-center">{currentFormattedDate}</p>
+                <p className="text-xs text-center text-muted-foreground mt-1">ID: {appointment.calendarId}</p>
+              </div>
+              <div className="p-4 border rounded-lg bg-secondary">
+                <h4 className="font-semibold text-center mb-2">{t('reschedule.summary.new')}</h4>
+                <p className="text-sm text-center font-bold">{newFormattedDate}</p>
+              </div>
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={prevStep} disabled={isSubmitting}>
