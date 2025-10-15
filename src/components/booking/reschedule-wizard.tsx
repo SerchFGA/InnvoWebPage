@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useTransition, useEffect } from 'react';
@@ -134,7 +133,7 @@ export function RescheduleWizard({
         TelefonoUsuario: patientData.phone,
         ID_Doctor: Number(appointment.doctorId),
         NombrePaciente: patientData.patientName,
-        MotivoCita: appointment.motive,
+        MotivoCita: appointment.motive || null,
         FechaCitaNueva: dateForBackend,
       };
 
@@ -142,7 +141,6 @@ export function RescheduleWizard({
 
       if (result.success) {
         toast({ title: t('toast.reschedule.success')});
-        // Use the backend-formatted string directly for UI consistency on update
         const newDateForUI = dateForBackend;
         onRescheduleSuccess(appointment.appointmentId, newDateForUI, result.data?.newCalendarId);
       } else {
