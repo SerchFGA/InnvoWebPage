@@ -27,9 +27,9 @@ const rescheduleAppointmentSchema = z.object({
   FechaCitaNueva: z.string().min(1), // Expecting YYYY-MM-DDTHH:mm:ss-HH:mm format
 });
 
-const SEARCH_WEBHOOK_URL = 'https://devn8n.pixanai.com/webhook/GetUsersDatesInnvo';
-const CANCEL_WEBHOOK_URL = 'https://devn8n.pixanai.com/webhook/CancelAppointmentInnvo';
-const RESCHEDULE_WEBHOOK_URL = 'https://devn8n.pixanai.com/webhook/ReSchedulingAppointmentInnvo';
+const SEARCH_WEBHOOK_URL = process.env.N8N_PATIENT_SEARCH_WEBHOOK_URL;
+const CANCEL_WEBHOOK_URL = process.env.N8N_CANCEL_APPOINTMENT_WEBHOOK_URL;
+const RESCHEDULE_WEBHOOK_URL = process.env.N8N_RESCHEDULE_APPOINTMENT_WEBHOOK_URL;
 
 
 export type PatientData = {
@@ -99,6 +99,11 @@ export async function searchPatientByPhone(
   const startTime = Date.now();
   
   if (!session.isLoggedIn || !session.username) {
+    return { success: false, error: 'server-error' };
+  }
+
+  if (!SEARCH_WEBHOOK_URL) {
+    console.error({ event: 'patient_search_misconfigured', error: 'SEARCH_WEBHOOK_URL not set' });
     return { success: false, error: 'server-error' };
   }
 
@@ -205,6 +210,11 @@ export async function cancelAppointment(
     return { success: false, error: 'server-error' };
   }
 
+  if (!CANCEL_WEBHOOK_URL) {
+    console.error({ ...logPayload, event: 'cancel_response', ok: false, errorCode: 'misconfigured', message: 'CANCEL_WEBHOOK_URL not set', durationMs: Date.now() - startTime });
+    return { success: false, error: 'server-error' };
+  }
+
   const isCancelAllowed = await checkRateLimit(`cancel:${session.username}`, 5, 60 * 1000); // 5 per minute
   if (!isCancelAllowed) {
     console.warn({ ...logPayload, event: 'cancel_response', ok: false, errorCode: 'rate-limited', durationMs: Date.now() - startTime });
@@ -272,11 +282,15 @@ export async function rescheduleAppointment(
       doctorId: appointmentData.ID_Doctor,
       phoneLast4: appointmentData.TelefonoUsuario.slice(-4),
   };
-  console.log(JSON.stringify(logPayload));
   
   if (!session.isLoggedIn || !session.username) {
     console.error({ ...logPayload, event: 'reschedule_response', ok: false, errorCode: 'unauthenticated', durationMs: Date.now() - startTime });
     return { success: false, message: 'Authentication required' };
+  }
+
+  if (!RESCHEDULE_WEBHOOK_URL) {
+    console.error({ ...logPayload, event: 'reschedule_response', ok: false, errorCode: 'misconfigured', message: 'RESCHEDULE_WEBHOOK_URL not set', durationMs: Date.now() - startTime });
+    return { success: false, message: 'Server configuration error' };
   }
 
   const isRescheduleAllowed = await checkRateLimit(`reschedule:${session.username}`, 5, 60 * 1000); // 5 per minute
@@ -304,7 +318,7 @@ export async function rescheduleAppointment(
         ...validation.data
     };
 
-    console.log("Reschedule Payload being sent:", JSON.stringify(payload, null, 2));
+    console.log("Reschedule request payload:", JSON.stringify(logPayload));
 
     const response = await fetch(RESCHEDULE_WEBHOOK_URL, {
       method: 'POST',
@@ -344,3 +358,5 @@ export async function rescheduleAppointment(
     return { success: false, message: 'An unexpected error occurred.' };
   }
 }
+
+    
