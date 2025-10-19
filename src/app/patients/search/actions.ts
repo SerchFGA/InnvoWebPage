@@ -274,8 +274,6 @@ export async function rescheduleAppointment(
   const session = await getSession();
   const requestId = randomUUID();
   const startTime = Date.now();
-
-  console.log("DEBUG: Received data in rescheduleAppointment action:", JSON.stringify(appointmentData));
   
   const logPayload = {
       event: 'reschedule_request',
@@ -316,8 +314,6 @@ export async function rescheduleAppointment(
         ...validation.data
     };
     
-    console.log("Reschedule request payload:", JSON.stringify(logPayload));
-
     const response = await fetch(RESCHEDULE_WEBHOOK_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
