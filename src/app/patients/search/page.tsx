@@ -195,7 +195,9 @@ function AppointmentCard({
                 onOpenChange={setRescheduleWizardOpen}
                 appointment={appointment}
                 patientData={{ patientName: patientData.patientName, phone: patientData.phone }}
-                onRescheduleSuccess={handleRescheduleSuccess}
+                onRescheduleSuccess={(appointmentId, newDate, newCalendarId) =>
+                  handleRescheduleSuccess(newDate, newCalendarId)
+                }
             />
         )}
       </>
@@ -331,5 +333,7 @@ export default function PatientSearchPage() {
     </div>
   );
 }
+
+    
 
     
