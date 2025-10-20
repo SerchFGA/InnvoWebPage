@@ -313,9 +313,7 @@ export default function PatientSearchPage() {
                                 appointment={app} 
                                 patientData={{ patientName: patientData.patientName, phone: patientData.phone }}
                                 onCancelSuccess={handleCancelSuccess} 
-                                onRescheduleSuccess={(appointmentId, newDate, newCalendarId) => {
-                                  handleRescheduleSuccess(appointmentId, newDate, newCalendarId);
-                                }}
+                                onRescheduleSuccess={handleRescheduleSuccess}
                             />
                         ))}
                     </div>
