@@ -1,5 +1,10 @@
+
 export const translations = {
   en: {
+    // Menu
+    menu_agendar: 'Scheduler',
+    menu_buscarPaciente: 'Search Patient',
+
     // Progress Bar
     progressStep1: 'Select Doctor & Date',
     progressStep2: 'Select Time',
@@ -39,18 +44,55 @@ export const translations = {
     step4Description: 'Your appointment with {{doctor}} on {{date}} at {{time}} has been successfully scheduled.',
     
     // Toasts & Errors
-    noTimeSlotsTitle: 'No Time Slots',
-    noTimeSlotsDescription: 'No available time slots for this doctor on the selected date.',
-    errorTitle: 'Oh no! Something went wrong.',
-    errorDescription: 'Unable to retrieve available hours. Please try again.',
-    unknownError: 'An unknown error occurred.',
-    missingInfo: 'Missing appointment information. Please go back.',
+    'noTimeSlotsTitle': 'No Time Slots',
+    'noTimeSlotsDescription': 'No available time slots for this doctor on the selected date.',
+    'errorTitle': 'Oh no! Something went wrong.',
+    'errorDescription': 'Unable to retrieve available hours. Please try again.',
+    'unknownError': 'An unknown error occurred.',
+    'missingInfo': 'Missing appointment information. Please go back.',
+    'toast.cancel.success': 'Appointment canceled successfully.',
+    'toast.cancel.error': 'Could not cancel appointment. Please try again.',
+    'toast.reschedule.success': 'Appointment rescheduled successfully.',
+    'toast.reschedule.error': 'Could not reschedule. Please try another time.',
 
     // Form Validation
     fullNameMin: 'Full name must be at least 3 characters.',
     phoneRegex: 'Please enter a valid 10-digit phone number.',
     reasonRequired: 'Reason for appointment is required.',
+
+    // Patient Search
+    search_title: 'Search Patient',
+    search_subtitle: 'Enter the phone number in the requested format',
+    search_labels_cc: 'Country',
+    search_labels_fixed: 'Fixed',
+    search_labels_number10: 'Phone Number',
+    search_cta: 'Search',
+    search_errors_invalidInput: 'The provided data is invalid.',
+    search_errors_server: 'Could not retrieve patient data. Please try again.',
+    search_empty: 'No appointments found for this patient.',
+    search_patient_info: 'Patient Information',
+
+    // Appointment Card Actions
+    appt_actions_cancel: "Cancel",
+    appt_actions_reschedule: "Reschedule",
+    appt_a11y_cancel: "Cancel appointment {{service}} with doctor {{doctorId}} on {{start}}.",
+    appt_a11y_reschedule: "Reschedule appointment {{service}} with doctor {{doctorId}} on {{start}}.",
     
+    // Cancel Dialog
+    'cancel.title': 'Confirm Cancellation',
+    'cancel.confirm': 'Confirm',
+    'cancel.close': 'Close',
+
+    // Reschedule Wizard
+    'reschedule.title': 'Reschedule Appointment',
+    'reschedule.step1.title': 'Select a new date',
+    'reschedule.step2.title': 'Select a new time',
+    'reschedule.step3.title': 'Confirm Change',
+    'reschedule.summary.current': 'Current',
+    'reschedule.summary.new': 'New',
+    'reschedule.confirm': 'Confirm',
+    'reschedule.back': 'Back',
+
     // Footer
     footerAllRightsReserved: 'All rights reserved.',
     footerPrivacyPolicy: 'Privacy Policy',
@@ -59,6 +101,10 @@ export const translations = {
     footerPoweredBy: 'Powered by'
   },
   es: {
+    // Menu
+    menu_agendar: 'Agendar',
+    menu_buscarPaciente: 'Buscar Paciente',
+
     // Progress Bar
     progressStep1: 'Seleccionar Doctor y Fecha',
     progressStep2: 'Seleccionar Hora',
@@ -98,17 +144,55 @@ export const translations = {
     step4Description: 'Tu cita con {{doctor}} el {{date}} a las {{time}} ha sido agendada exitosamente.',
     
     // Toasts & Errors
-    noTimeSlotsTitle: 'No hay Horarios Disponibles',
-    noTimeSlotsDescription: 'No hay horarios disponibles para este doctor en la fecha seleccionada.',
-    errorTitle: '¡Oh no! Algo salió mal.',
-    errorDescription: 'No se pudieron obtener los horarios disponibles. Por favor, intenta de nuevo.',
-    unknownError: 'Ocurrió un error desconocido.',
-    missingInfo: 'Falta información de la cita. Por favor, retrocede.',
+    'noTimeSlotsTitle': 'No hay Horarios Disponibles',
+    'noTimeSlotsDescription': 'No hay horarios disponibles para este doctor en la fecha seleccionada.',
+    'errorTitle': '¡Oh no! Algo salió mal.',
+    'errorDescription': 'No se pudieron obtener los horarios disponibles. Por favor, intenta de nuevo.',
+    'unknownError': 'Ocurrió un error desconocido.',
+    'missingInfo': 'Falta información de la cita. Por favor, retrocede.',
+    'toast.cancel.success': 'Cita cancelada correctamente.',
+    'toast.cancel.error': 'No se pudo cancelar la cita. Intenta de nuevo.',
+    'toast.reschedule.success': 'Cita reagendada correctamente.',
+    'toast.reschedule.error': 'No se pudo reagendar, intenta otra hora.',
+
     
     // Form Validation
     fullNameMin: 'El nombre completo debe tener al menos 3 caracteres.',
     phoneRegex: 'Por favor, ingresa un número de teléfono válido de 10 dígitos.',
     reasonRequired: 'El motivo de la cita es obligatorio.',
+
+    // Patient Search
+    search_title: 'Buscar Paciente',
+    search_subtitle: 'Ingresa el teléfono en el formato solicitado.',
+    search_labels_cc: 'País',
+    search_labels_fixed: 'Fijo',
+    search_labels_number10: 'Teléfono',
+    search_cta: 'Buscar',
+    search_errors_invalidInput: 'Los datos proporcionados son inválidos.',
+    search_errors_server: 'No se pudo obtener la información del paciente. Intenta de nuevo.',
+    search_empty: 'No se encontraron citas para este paciente.',
+    search_patient_info: 'Información del Paciente',
+
+    // Appointment Card Actions
+    appt_actions_cancel: "Cancelar",
+    appt_actions_reschedule: "Reagendar",
+    appt_a11y_cancel: "Cancelar cita {{service}} del doctor {{doctorId}} el {{start}}.",
+    appt_a11y_reschedule: "Reagendar cita {{service}} del doctor {{doctorId}} el {{start}}.",
+
+    // Cancel Dialog
+    'cancel.title': 'Confirmar cancelación',
+    'cancel.confirm': 'Confirmar',
+    'cancel.close': 'Cerrar',
+
+    // Reschedule Wizard
+    'reschedule.title': 'Reagendar cita',
+    'reschedule.step1.title': 'Selecciona una fecha',
+    'reschedule.step2.title': 'Selecciona un horario',
+    'reschedule.step3.title': 'Confirma el cambio',
+    'reschedule.summary.current': 'Actual',
+    'reschedule.summary.new': 'Nueva',
+    'reschedule.confirm': 'Confirmar',
+    'reschedule.back': 'Atrás',
 
     // Footer
     footerAllRightsReserved: 'Todos los derechos reservados.',
@@ -121,3 +205,5 @@ export const translations = {
 
 export type TranslationKey = keyof typeof translations.en;
 export type InterpolationData = { [key: string]: string | number };
+
+    
