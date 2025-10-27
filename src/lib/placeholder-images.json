@@ -6,7 +6,7 @@
       "services": "HOMEOPATIA, TRAUMATOLOGIA, OSTEOPATIA",
       "duration": "30 min session",
       "image": {
-        "src": "https://picsum.photos/seed/doc1/80/80",
+        "src": "/assets/DrAlfonsoCarvajal.webp",
         "width": 80,
         "height": 80,
         "aiHint": "doctor portrait"
@@ -42,7 +42,7 @@
       "services": "REVISIONES DE PLANTILLAS",
       "duration": "30 min session",
       "image": {
-        "src": "https://picsum.photos/seed/pod1/80/80",
+        "src": "/assets/RevisionesPodImage.webp",
         "width": 80,
         "height": 80,
         "aiHint": "foot care"
@@ -54,7 +54,7 @@
       "services": "ESTUDIO DE LA PISADA",
       "duration": "60 min session",
       "image": {
-        "src": "https://picsum.photos/seed/bio1/80/80",
+        "src": "/assets/EstudioPisadaImage.webp",
         "width": 80,
         "height": 80,
         "aiHint": "biomechanics study"
@@ -66,7 +66,7 @@
       "services": "CUIDADOS DEL PIE",
       "duration": "30 min session",
       "image": {
-        "src": "https://picsum.photos/seed/pod2/80/80",
+        "src": "/assets/QuiropodiaImage.webp",
         "width": 80,
         "height": 80,
         "aiHint": "podiatry tools"
@@ -78,7 +78,7 @@
       "services": "REHABILITACION FISICA",
       "duration": "60 min session",
       "image": {
-        "src": "https://picsum.photos/seed/fisi1/80/80",
+        "src": "/assets/FisioterapiaImage.webp",
         "width": 80,
         "height": 80,
         "aiHint": "physical therapy"
