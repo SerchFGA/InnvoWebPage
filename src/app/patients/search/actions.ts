@@ -13,18 +13,18 @@ const patientSearchSchema = z.object({
 const cancelAppointmentSchema = z.object({
   CalendarID: z.string().min(1),
   FechaCita: z.string().min(1),
-  TelefonoUsuario: z.string().regex(/^\+?\d{11,15}$/),
+  TelefonoUsuario: z.string().min(1),
   ID_Doctor: z.number(),
 });
 
 const rescheduleAppointmentSchema = z.object({
   CalendarID: z.string().min(1, "CalendarID is required"),
   FechaCitaCancelar: z.string().min(1, "FechaCitaCancelar is required"),
-  TelefonoUsuario: z.string().regex(/^\+?\d{11,15}$/, "Invalid phone number format"),
+  TelefonoUsuario: z.string().min(1, "Invalid phone number format"),
   ID_Doctor: z.number({ required_error: "ID_Doctor is required" }),
   NombrePaciente: z.string().min(1, "NombrePaciente is required"),
   MotivoCita: z.string().nullable(),
-  FechaCitaNueva: z.string().min(1, "FechaCitaNueva is required"), // Expecting YYYY-MM-DDTHH:mm:ss-HH:mm format
+  FechaCitaNueva: z.string().min(1, "FechaCitaNueva is required"),
 });
 
 
@@ -123,7 +123,7 @@ export async function searchPatientByPhone(
     return { success: false, error: 'invalid-input' };
   }
 
-  const fullPhone = `+${validation.data.countryCode}1${validation.data.phoneNumber}`;
+  const fullPhone = `${validation.data.countryCode}1${validation.data.phoneNumber}`;
   
   try {
     const response = await fetch(SEARCH_WEBHOOK_URL, {
@@ -136,8 +136,6 @@ export async function searchPatientByPhone(
       cache: 'no-store'
     });
 
-    const durationMs = Date.now() - startTime;
-
     if (!response.ok) {
         return { success: false, error: 'server-error' };
     }
@@ -147,13 +145,12 @@ export async function searchPatientByPhone(
     // The response is an array of objects, we take the first one.
     const data = Array.isArray(responseData) ? responseData[0] : responseData;
 
-
     if (!data || !data.Citas || data.Citas.length === 0) {
       return { success: true, data: null };
     }
 
     const normalizedData: PatientData = {
-      phone: data.Telefono,
+      phone: data.Telefono || fullPhone,
       appointments: data.Citas.map((cita: any) => ({
         appointmentId: cita.Id,
         patientName: cita.Nombre || 'N/A',
@@ -177,16 +174,6 @@ export async function cancelAppointment(
 ): Promise<CancelResult> {
   const session = await getSession();
   const requestId = randomUUID();
-  const startTime = Date.now();
-
-  const logPayload = {
-      event: 'cancel_request',
-      requestId,
-      user: session.username,
-      calendarId: appointmentData.CalendarID,
-      doctorId: appointmentData.ID_Doctor,
-      phoneLast4: appointmentData.TelefonoUsuario.slice(-4),
-  };
 
   if (!session.isLoggedIn || !session.username) {
     return { success: false, error: 'server-error' };
@@ -218,22 +205,10 @@ export async function cancelAppointment(
       cache: 'no-store'
     });
 
-    const durationMs = Date.now() - startTime;
-    
     if (!response.ok) {
-        const errorBody = await response.text();
         return { success: false, error: 'server-error' };
     }
     
-    // Handle 204 No Content or empty bodies as success
-    if (response.status === 204 || response.headers.get('content-length') === '0') {
-      return { success: true };
-    }
-    
-    // Try to parse JSON, but don't fail if it's not JSON
-    const result = await response.json().catch(() => ({}));
-    
-    // Success if status is 2xx
     return { success: true };
 
   } catch (e) {
@@ -246,16 +221,6 @@ export async function rescheduleAppointment(
 ): Promise<RescheduleResult> {
   const session = await getSession();
   const requestId = randomUUID();
-  const startTime = Date.now();
-  
-  const logPayload = {
-      event: 'reschedule_request',
-      requestId,
-      user: session.username,
-      calendarId: appointmentData.CalendarID,
-      doctorId: appointmentData.ID_Doctor,
-      phoneLast4: appointmentData.TelefonoUsuario.slice(-4),
-  };
   
   if (!session.isLoggedIn || !session.username) {
     return { success: false, message: 'Authentication required' };
@@ -290,8 +255,6 @@ export async function rescheduleAppointment(
       cache: 'no-store'
     });
 
-    const durationMs = Date.now() - startTime;
-
     if (!response.ok) {
         let errorBody = await response.text();
         try {
@@ -316,6 +279,4 @@ export async function rescheduleAppointment(
     return { success: false, message: 'An unexpected error occurred.' };
   }
 }
-    
-
     

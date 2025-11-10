@@ -32,11 +32,13 @@ function SubmitButton({ disabled }: { disabled: boolean }) {
 }
 
 function AppointmentCard({ 
-  appointment, 
+  appointment,
+  phone,
   onCancelSuccess, 
   onRescheduleSuccess 
 }: { 
-  appointment: Appointment, 
+  appointment: Appointment,
+  phone: string,
   onCancelSuccess: (id: number) => void, 
   onRescheduleSuccess: (id: number, newDate: string, newCalendarId: string | undefined) => void 
 }) {
@@ -65,7 +67,7 @@ function AppointmentCard({
           CalendarID: appointment.calendarId,
           FechaCita: appointment.start,
           ID_Doctor: Number(appointment.doctorId),
-          TelefonoUsuario: `+521${appointment.phone}`, // Assuming phone is part of appointment now
+          TelefonoUsuario: phone,
         });
 
         if (result.success) {
@@ -108,7 +110,7 @@ function AppointmentCard({
                 </CardTitle>
                 <p className="text-sm text-muted-foreground flex items-center gap-2">
                     <Phone className="w-4 h-4"/>
-                    {appointment.phone}
+                    {phone}
                 </p>
             </CardHeader>
             <CardContent className="p-4 pt-0 flex-grow flex flex-col">
@@ -182,6 +184,7 @@ function AppointmentCard({
                 isOpen={rescheduleWizardOpen}
                 onOpenChange={setRescheduleWizardOpen}
                 appointment={appointment}
+                phone={phone}
                 onRescheduleSuccess={(appointmentId, newDate, newCalendarId) => handleRescheduleSuccess(appointmentId, newDate, newCalendarId)}
             />
         )}
@@ -301,7 +304,8 @@ export default function PatientSearchPage() {
                     {patientData.appointments.map(app => (
                         <AppointmentCard 
                             key={app.appointmentId} 
-                            appointment={{...app, phone: patientData.phone}} 
+                            appointment={app} 
+                            phone={patientData.phone}
                             onCancelSuccess={handleCancelSuccess} 
                             onRescheduleSuccess={handleRescheduleSuccess}
                         />
@@ -320,5 +324,3 @@ export default function PatientSearchPage() {
     </div>
   );
 }
-
-    
