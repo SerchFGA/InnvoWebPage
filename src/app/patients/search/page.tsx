@@ -31,35 +31,12 @@ function SubmitButton({ disabled }: { disabled: boolean }) {
   );
 }
 
-function PatientCard({ patient }: { patient: PatientData }) {
-    const { t } = useTranslation();
-    return (
-        <Card className="mt-8 animate-in fade-in-50 duration-500 shadow-lg rounded-2xl">
-            <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                    <User className="w-6 h-6 text-primary"/>
-                    {t('search_patient_info')}
-                </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-                <p className="font-semibold text-lg">{patient.patientName}</p>
-                <p className="text-muted-foreground flex items-center gap-2">
-                    <Phone className="w-4 h-4"/>
-                    {patient.phone}
-                </p>
-            </CardContent>
-        </Card>
-    );
-}
-
 function AppointmentCard({ 
   appointment, 
-  patientData, 
   onCancelSuccess, 
   onRescheduleSuccess 
 }: { 
   appointment: Appointment, 
-  patientData: { patientName: string, phone: string }, 
   onCancelSuccess: (id: number) => void, 
   onRescheduleSuccess: (id: number, newDate: string, newCalendarId: string | undefined) => void 
 }) {
@@ -88,7 +65,7 @@ function AppointmentCard({
           CalendarID: appointment.calendarId,
           FechaCita: appointment.start,
           ID_Doctor: Number(appointment.doctorId),
-          TelefonoUsuario: patientData.phone,
+          TelefonoUsuario: `+521${appointment.phone}`, // Assuming phone is part of appointment now
         });
 
         if (result.success) {
@@ -102,8 +79,8 @@ function AppointmentCard({
       });
     }
 
-    const handleRescheduleSuccess = (newDate: string, newCalendarId: string | undefined) => {
-        onRescheduleSuccess(appointment.appointmentId, newDate, newCalendarId);
+    const handleRescheduleSuccess = (appointmentId: number, newDate: string, newCalendarId: string | undefined) => {
+        onRescheduleSuccess(appointmentId, newDate, newCalendarId);
         setRescheduleWizardOpen(false);
     }
     
@@ -124,7 +101,17 @@ function AppointmentCard({
     return (
       <>
         <Card className={cn("shadow-md rounded-lg flex flex-col transition-opacity", isCancelled && "opacity-60 bg-muted/50")} data-appointment-id={appointment.appointmentId}>
-            <CardContent className="p-4 flex-grow flex flex-col">
+            <CardHeader className="flex-row items-center justify-between pb-2">
+                <CardTitle className="flex items-center gap-2 text-lg">
+                    <User className="w-5 h-5 text-primary"/>
+                    {appointment.patientName}
+                </CardTitle>
+                <p className="text-sm text-muted-foreground flex items-center gap-2">
+                    <Phone className="w-4 h-4"/>
+                    {appointment.phone}
+                </p>
+            </CardHeader>
+            <CardContent className="p-4 pt-0 flex-grow flex flex-col">
                 <div className='flex-grow'>
                     <p className="font-bold text-lg text-primary">{appointment.service}</p>
                      <div className="text-sm text-muted-foreground space-y-2 mt-2">
@@ -141,8 +128,9 @@ function AppointmentCard({
                         data-action="cancel"
                         aria-label={a11yCancelLabel}
                         onClick={handleCancelClick}
-                        disabled={isCancelled}
+                        disabled={isCancelled || isCanceling}
                     >
+                         {isCanceling ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                         {t('appt_actions_cancel')}
                     </Button>
                     <Button
@@ -194,10 +182,7 @@ function AppointmentCard({
                 isOpen={rescheduleWizardOpen}
                 onOpenChange={setRescheduleWizardOpen}
                 appointment={appointment}
-                patientData={{ patientName: patientData.patientName, phone: patientData.phone }}
-                onRescheduleSuccess={(appointmentId, newDate, newCalendarId) =>
-                  handleRescheduleSuccess(newDate, newCalendarId)
-                }
+                onRescheduleSuccess={(appointmentId, newDate, newCalendarId) => handleRescheduleSuccess(appointmentId, newDate, newCalendarId)}
             />
         )}
       </>
@@ -213,9 +198,9 @@ export default function PatientSearchPage() {
   const [patientData, setPatientData] = useState<PatientData | null>(null);
 
   useEffect(() => {
-    if (state?.success && state.data) {
+    if (state?.success) {
       setPatientData(state.data);
-    } else if(state?.success && !state.data) {
+    } else if(state?.success === false) {
       setPatientData(null);
     }
   }, [state]);
@@ -223,11 +208,17 @@ export default function PatientSearchPage() {
   const handleCancelSuccess = (appointmentId: number) => {
     setPatientData(prevData => {
       if (!prevData) return null;
+      const updatedAppointments = prevData.appointments.filter(
+        app => app.appointmentId !== appointmentId
+      );
+
+      if (updatedAppointments.length === 0) {
+        return null;
+      }
+
       return {
         ...prevData,
-        appointments: prevData.appointments.map(app => 
-          app.appointmentId === appointmentId ? { ...app, status: 'Cancelada' } : app
-        ),
+        appointments: updatedAppointments,
       };
     });
   };
@@ -305,27 +296,23 @@ export default function PatientSearchPage() {
                 </div>
             )}
 
-            {patientData && (
-                <>
-                    <PatientCard patient={patientData} />
-                    <div className="mt-8 grid gap-4 md:grid-cols-2">
-                        {patientData.appointments.map(app => (
-                            <AppointmentCard 
-                                key={app.appointmentId} 
-                                appointment={app} 
-                                patientData={{ patientName: patientData.patientName, phone: patientData.phone }}
-                                onCancelSuccess={handleCancelSuccess} 
-                                onRescheduleSuccess={handleRescheduleSuccess}
-                            />
-                        ))}
-                    </div>
-                </>
-            )}
-
-            {state?.success === true && !state.data && !patientData && (
-                 <div className="text-center p-8 rounded-lg bg-secondary/50 text-muted-foreground font-medium">
-                    {t('search_empty')}
+            {patientData && patientData.appointments.length > 0 ? (
+                <div className="mt-8 grid gap-4 md:grid-cols-2">
+                    {patientData.appointments.map(app => (
+                        <AppointmentCard 
+                            key={app.appointmentId} 
+                            appointment={{...app, phone: patientData.phone}} 
+                            onCancelSuccess={handleCancelSuccess} 
+                            onRescheduleSuccess={handleRescheduleSuccess}
+                        />
+                    ))}
                 </div>
+            ) : (
+                 state?.success === true && (
+                    <div className="text-center p-8 rounded-lg bg-secondary/50 text-muted-foreground font-medium">
+                        {t('search_empty')}
+                    </div>
+                )
             )}
         </div>
 
@@ -333,7 +320,5 @@ export default function PatientSearchPage() {
     </div>
   );
 }
-
-    
 
     

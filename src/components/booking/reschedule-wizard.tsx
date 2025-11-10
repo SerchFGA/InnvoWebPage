@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useTransition, useEffect } from 'react';
@@ -23,10 +24,6 @@ interface RescheduleWizardProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   appointment: Appointment;
-  patientData: {
-    patientName: string;
-    phone: string;
-  };
   onRescheduleSuccess: (appointmentId: number, newDate: string, newCalendarId: string | undefined) => void;
 }
 
@@ -44,7 +41,6 @@ export function RescheduleWizard({
   isOpen,
   onOpenChange,
   appointment,
-  patientData,
   onRescheduleSuccess,
 }: RescheduleWizardProps) {
   const { t, language } = useTranslation();
@@ -130,9 +126,9 @@ export function RescheduleWizard({
       const payload = {
         CalendarID: appointment.calendarId,
         FechaCitaCancelar: appointment.start,
-        TelefonoUsuario: patientData.phone,
+        TelefonoUsuario: `+521${appointment.phone}`,
         ID_Doctor: Number(appointment.doctorId),
-        NombrePaciente: patientData.patientName,
+        NombrePaciente: appointment.patientName,
         MotivoCita: appointment.motive || null,
         FechaCitaNueva: dateForBackend,
       };
@@ -216,7 +212,7 @@ export function RescheduleWizard({
             <DialogHeader>
               <DialogTitle>{t('reschedule.step3.title')}</DialogTitle>
               <DialogDescription>
-                  Confirma los detalles para reagendar la cita de <strong>{patientData.patientName}</strong> ({patientData.phone}).
+                  Confirma los detalles para reagendar la cita de <strong>{appointment.patientName}</strong> ({`+521${appointment.phone}`}).
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
@@ -264,3 +260,5 @@ export function RescheduleWizard({
     </Dialog>
   );
 }
+
+    
