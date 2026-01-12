@@ -129,7 +129,7 @@ export function RescheduleWizard({
       const payload = {
         CalendarID: appointment.calendarId,
         FechaCitaCancelar: appointment.start,
-        FechaCitaCancelar: appointment.start,
+
         TelefonoUsuario: phone,
         CountryCode: countryCode,
         PhoneNumber: phoneNumber,
