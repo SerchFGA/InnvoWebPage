@@ -25,7 +25,7 @@ interface RescheduleWizardProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   appointment: Appointment;
-  appointment: Appointment;
+
   phone: string;
   countryCode?: string;
   phoneNumber?: string;
