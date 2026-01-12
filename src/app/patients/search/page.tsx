@@ -73,7 +73,7 @@ function AppointmentCard({
         CalendarID: appointment.calendarId,
         FechaCita: appointment.start,
         ID_Doctor: Number(appointment.doctorId),
-        ID_Doctor: Number(appointment.doctorId),
+
         TelefonoUsuario: phone,
         CountryCode: countryCode,
         PhoneNumber: phoneNumber,
