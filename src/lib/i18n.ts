@@ -10,7 +10,7 @@ export const translations = {
     progressStep2: 'Select Time',
     progressStep3: 'Your Details',
     progressStep4: 'Confirmation',
-    
+
     // Buttons
     continueButton: 'Continue',
     backButton: 'Back',
@@ -18,16 +18,16 @@ export const translations = {
     scheduleButton: 'Schedule Appointment',
     startOverButton: 'Start Over',
     scheduleAnotherButton: 'Schedule Another Appointment',
-    
+
     // Step 1
     step1Title: 'Select Doctor and Date',
     step1Description: 'Choose a specialist and a preferred date for your appointment.',
     step1ValidationError: 'Please select a doctor and a date.',
-    
+
     // Step 2
     step2Title: 'Select a Time Slot',
     step2Description: 'Available times for',
-    
+
     // Step 3
     step3Title: 'Confirm Your Appointment',
     step3Description: 'Please provide your details for your appointment with {{doctor}} on {{date}} at {{time}}.',
@@ -38,11 +38,14 @@ export const translations = {
     reasonPlaceholder: 'e.g., General Checkup',
     notesLabel: 'Notes (Optional)',
     notesPlaceholder: 'Any additional information for the doctor...',
-    
+    countryCodeLabel: 'Country Code',
+    countryCodeSearch: 'Search country...',
+    countryCodeNoResults: 'No countries found',
+
     // Step 4
     step4Title: 'Appointment Confirmed!',
     step4Description: 'Your appointment with {{doctor}} on {{date}} at {{time}} has been successfully scheduled.',
-    
+
     // Toasts & Errors
     'noTimeSlotsTitle': 'No Time Slots',
     'noTimeSlotsDescription': 'No available time slots for this doctor on the selected date.',
@@ -77,7 +80,7 @@ export const translations = {
     appt_actions_reschedule: "Reschedule",
     appt_a11y_cancel: "Cancel appointment {{service}} with doctor {{doctorId}} on {{start}}.",
     appt_a11y_reschedule: "Reschedule appointment {{service}} with doctor {{doctorId}} on {{start}}.",
-    
+
     // Cancel Dialog
     'cancel.title': 'Confirm Cancellation',
     'cancel.confirm': 'Confirm',
@@ -110,7 +113,7 @@ export const translations = {
     progressStep2: 'Seleccionar Hora',
     progressStep3: 'Tus Datos',
     progressStep4: 'Confirmación',
-    
+
     // Buttons
     continueButton: 'Continuar',
     backButton: 'Atrás',
@@ -118,16 +121,16 @@ export const translations = {
     scheduleButton: 'Agendar Cita',
     startOverButton: 'Comenzar de Nuevo',
     scheduleAnotherButton: 'Agendar Otra Cita',
-    
+
     // Step 1
     step1Title: 'Selecciona Doctor y Fecha',
     step1Description: 'Elige un especialista y una fecha preferida para tu cita.',
     step1ValidationError: 'Por favor, selecciona un doctor y una fecha.',
-    
+
     // Step 2
     step2Title: 'Selecciona un Horario',
     step2Description: 'Horarios disponibles para',
-    
+
     // Step 3
     step3Title: 'Confirma tu Cita',
     step3Description: 'Por favor, proporciona tus datos para tu cita con {{doctor}} el {{date}} a las {{time}}.',
@@ -138,11 +141,14 @@ export const translations = {
     reasonPlaceholder: 'Ej., Chequeo General',
     notesLabel: 'Notas (Opcional)',
     notesPlaceholder: 'Cualquier información adicional para el doctor...',
-    
+    countryCodeLabel: 'Código de País',
+    countryCodeSearch: 'Buscar país...',
+    countryCodeNoResults: 'No se encontraron países',
+
     // Step 4
     step4Title: '¡Cita Confirmada!',
     step4Description: 'Tu cita con {{doctor}} el {{date}} a las {{time}} ha sido agendada exitosamente.',
-    
+
     // Toasts & Errors
     'noTimeSlotsTitle': 'No hay Horarios Disponibles',
     'noTimeSlotsDescription': 'No hay horarios disponibles para este doctor en la fecha seleccionada.',
@@ -155,7 +161,7 @@ export const translations = {
     'toast.reschedule.success': 'Cita reagendada correctamente.',
     'toast.reschedule.error': 'No se pudo reagendar, intenta otra hora.',
 
-    
+
     // Form Validation
     fullNameMin: 'El nombre completo debe tener al menos 3 caracteres.',
     phoneRegex: 'Por favor, ingresa un número de teléfono válido de 10 dígitos.',
@@ -206,4 +212,3 @@ export const translations = {
 export type TranslationKey = keyof typeof translations.en;
 export type InterpolationData = { [key: string]: string | number };
 
-    

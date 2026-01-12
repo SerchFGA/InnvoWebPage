@@ -25,7 +25,10 @@ interface RescheduleWizardProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   appointment: Appointment;
+  appointment: Appointment;
   phone: string;
+  countryCode?: string;
+  phoneNumber?: string;
   onRescheduleSuccess: (appointmentId: number, newDate: string, newCalendarId: string | undefined) => void;
 }
 
@@ -43,7 +46,10 @@ export function RescheduleWizard({
   isOpen,
   onOpenChange,
   appointment,
+
   phone,
+  countryCode,
+  phoneNumber,
   onRescheduleSuccess,
 }: RescheduleWizardProps) {
   const { t, language } = useTranslation();
@@ -123,7 +129,10 @@ export function RescheduleWizard({
       const payload = {
         CalendarID: appointment.calendarId,
         FechaCitaCancelar: appointment.start,
+        FechaCitaCancelar: appointment.start,
         TelefonoUsuario: phone,
+        CountryCode: countryCode,
+        PhoneNumber: phoneNumber,
         ID_Doctor: Number(appointment.doctorId),
         NombrePaciente: appointment.patientName,
         MotivoCita: appointment.motive || null,

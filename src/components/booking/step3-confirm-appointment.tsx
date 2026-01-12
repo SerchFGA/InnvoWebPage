@@ -17,6 +17,8 @@ import type { BookingData } from '@/app/page';
 import { scheduleAppointment } from '@/app/booking-actions';
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from '@/contexts/language-context';
+import { CountryCodeSelect } from '@/components/ui/country-code-select';
+
 
 interface Step3Props {
   onNext: (data: { patientDetails: PatientDetails }) => void;
@@ -26,8 +28,10 @@ interface Step3Props {
 
 export function Step3ConfirmAppointment({ onNext, onBack, data }: Step3Props) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [countryCode, setCountryCode] = useState('52');
   const { toast } = useToast();
   const { t, language } = useTranslation();
+
 
 
 
@@ -62,7 +66,9 @@ export function Step3ConfirmAppointment({ onNext, onBack, data }: Step3Props) {
         time: timeString,
         duration: data.doctor?.duration,
         full_name: values.fullName,
-        phone: `+52${values.phone}`,
+        phone: `+${countryCode}${values.phone}`,
+        country_code: countryCode,
+        phone_number: values.phone,
         reason: values.reason,
         notes: values.notes,
       });
@@ -71,7 +77,7 @@ export function Step3ConfirmAppointment({ onNext, onBack, data }: Step3Props) {
         throw new Error(result.error || 'Failed to schedule appointment. Please try again.');
       }
 
-      onNext({ patientDetails: { ...values, phone: `+52${values.phone}` } });
+      onNext({ patientDetails: { ...values, phone: `+${countryCode}${values.phone}` } });
 
     } catch (error) {
       toast({
@@ -123,10 +129,13 @@ export function Step3ConfirmAppointment({ onNext, onBack, data }: Step3Props) {
                 <FormItem>
                   <FormLabel>{t('phoneLabel')}</FormLabel>
                   <FormControl>
-                    <div className="flex items-center">
-                      <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-input bg-secondary text-muted-foreground text-sm">
-                        +52
-                      </span>
+                    <div className="flex items-center gap-2">
+                      <div className="w-32">
+                        <CountryCodeSelect
+                          value={countryCode}
+                          onChange={setCountryCode}
+                        />
+                      </div>
                       <Input
                         type="tel"
                         placeholder="5512345678"
@@ -137,7 +146,7 @@ export function Step3ConfirmAppointment({ onNext, onBack, data }: Step3Props) {
                           const numericValue = value.replace(/\D/g, '').slice(0, 10);
                           field.onChange(numericValue);
                         }}
-                        className="rounded-l-none"
+                        className="flex-1"
                         aria-label={t('phoneLabel')}
                       />
                     </div>

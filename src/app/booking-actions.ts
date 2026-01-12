@@ -80,6 +80,8 @@ export async function scheduleAppointment(data: {
     duration?: string;
     full_name: string;
     phone: string;
+    country_code?: string;
+    phone_number?: string;
     reason: string;
     notes?: string;
 }) {
@@ -111,6 +113,8 @@ export async function scheduleAppointment(data: {
         duration: data.duration,
         full_name: data.full_name,
         phone: data.phone,
+        country_code: data.country_code,
+        phone_number: data.phone_number,
         reason: data.reason,
         notes: data.notes,
     };
