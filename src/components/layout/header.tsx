@@ -47,13 +47,13 @@ export function Header() {
           {user.isLoggedIn && (
             <div className="flex items-center gap-4 border-l pl-4">
                <nav className="flex items-center gap-2">
-                <Link href="/" passHref>
+                <Link href="/">
                   <Button variant={pathname === '/' ? 'default' : 'ghost'} size="sm" className="rounded-full">
                     <CalendarPlus className="mr-2 h-4 w-4" />
                     {t('menu_agendar')}
                   </Button>
                 </Link>
-                <Link href="/patients/search" passHref>
+                <Link href="/patients/search">
                   <Button variant={pathname === '/patients/search' ? 'default' : 'ghost'} size="sm" className="rounded-full">
                     <Search className="mr-2 h-4 w-4" />
                     {t('menu_buscarPaciente')}
