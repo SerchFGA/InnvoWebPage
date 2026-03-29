@@ -14,8 +14,11 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { patientDetailsSchema, type PatientDetails } from '@/lib/schemas';
 import type { BookingData } from '@/app/page';
+import { scheduleAppointment } from '@/app/booking-actions';
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from '@/contexts/language-context';
+import { CountryCodeSelect } from '@/components/ui/country-code-select';
+
 
 interface Step3Props {
   onNext: (data: { patientDetails: PatientDetails }) => void;
@@ -25,11 +28,13 @@ interface Step3Props {
 
 export function Step3ConfirmAppointment({ onNext, onBack, data }: Step3Props) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [countryCode, setCountryCode] = useState('52');
   const { toast } = useToast();
   const { t, language } = useTranslation();
 
-  const N8N_WEBHOOK_URL = process.env.NEXT_PUBLIC_N8N_SCHEDULE_APPOINTMENT_WEBHOOK_URL;
-  
+
+
+
   const form = useForm<PatientDetails>({
     resolver: zodResolver(patientDetailsSchema(t)),
     defaultValues: {
@@ -42,17 +47,7 @@ export function Step3ConfirmAppointment({ onNext, onBack, data }: Step3Props) {
 
   async function onSubmit(values: PatientDetails) {
     setIsSubmitting(true);
-    
-    if (!N8N_WEBHOOK_URL) {
-      toast({
-        variant: "destructive",
-        title: t('errorTitle'),
-        description: "Configuration error: Webhook URL is not set.",
-      });
-      setIsSubmitting(false);
-      return;
-    }
-    
+
     let timeString = '';
     if (data.time) {
       try {
@@ -63,33 +58,26 @@ export function Step3ConfirmAppointment({ onNext, onBack, data }: Step3Props) {
       }
     }
 
-    const payload = {
-      doctor_id: data.doctor?.id,
-      doctor: data.doctor?.name,
-      Fecha: data.date ? format(data.date, 'yyyy-MM-dd') : '',
-      Hora: timeString,
-      duration: data.doctor?.duration,
-      full_name: values.fullName,
-      phone: `+52${values.phone}`,
-      reason: values.reason,
-      notes: values.notes,
-    };
-
     try {
-      const response = await fetch(N8N_WEBHOOK_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
+      const result = await scheduleAppointment({
+        doctor_id: data.doctor?.id,
+        doctor_name: data.doctor?.name,
+        date_formatted: data.date ? format(data.date, 'yyyy-MM-dd') : '',
+        time: timeString,
+        duration: data.doctor?.duration,
+        full_name: values.fullName,
+        phone: `+${countryCode}${values.phone}`,
+        country_code: countryCode,
+        phone_number: values.phone,
+        reason: values.reason,
+        notes: values.notes,
       });
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ message: 'Failed to schedule appointment. The server returned an error.'}));
-        throw new Error(errorData.message || 'Failed to schedule appointment. Please try again.');
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to schedule appointment. Please try again.');
       }
-      
-      onNext({ patientDetails: { ...values, phone: `+52${values.phone}` } });
+
+      onNext({ patientDetails: { ...values, phone: `+${countryCode}${values.phone}` } });
 
     } catch (error) {
       toast({
@@ -141,10 +129,13 @@ export function Step3ConfirmAppointment({ onNext, onBack, data }: Step3Props) {
                 <FormItem>
                   <FormLabel>{t('phoneLabel')}</FormLabel>
                   <FormControl>
-                    <div className="flex items-center">
-                      <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-input bg-secondary text-muted-foreground text-sm">
-                        +52
-                      </span>
+                    <div className="flex items-center gap-2">
+                      <div className="w-32">
+                        <CountryCodeSelect
+                          value={countryCode}
+                          onChange={setCountryCode}
+                        />
+                      </div>
                       <Input
                         type="tel"
                         placeholder="5512345678"
@@ -155,7 +146,7 @@ export function Step3ConfirmAppointment({ onNext, onBack, data }: Step3Props) {
                           const numericValue = value.replace(/\D/g, '').slice(0, 10);
                           field.onChange(numericValue);
                         }}
-                        className="rounded-l-none"
+                        className="flex-1"
                         aria-label={t('phoneLabel')}
                       />
                     </div>

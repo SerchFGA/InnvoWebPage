@@ -14,6 +14,8 @@ const cancelAppointmentSchema = z.object({
   CalendarID: z.string().min(1),
   FechaCita: z.string().min(1),
   TelefonoUsuario: z.string().min(1),
+  CountryCode: z.string().optional(),
+  PhoneNumber: z.string().optional(),
   ID_Doctor: z.number(),
 });
 
@@ -21,6 +23,8 @@ const rescheduleAppointmentSchema = z.object({
   CalendarID: z.string().min(1, "CalendarID is required"),
   FechaCitaCancelar: z.string().min(1, "FechaCitaCancelar is required"),
   TelefonoUsuario: z.string().min(1, "Invalid phone number format"),
+  CountryCode: z.string().optional(),
+  PhoneNumber: z.string().optional(),
   ID_Doctor: z.number({ required_error: "ID_Doctor is required" }),
   NombrePaciente: z.string().min(1, "NombrePaciente is required"),
   MotivoCita: z.string().nullable(),
@@ -35,6 +39,8 @@ const RESCHEDULE_WEBHOOK_URL = process.env.N8N_RESCHEDULE_APPOINTMENT_WEBHOOK_UR
 
 export type PatientData = {
   phone: string;
+  countryCode?: string;
+  phoneNumber?: string;
   appointments: {
     appointmentId: number;
     patientName: string;
@@ -98,7 +104,7 @@ export async function searchPatientByPhone(
   const session = await getSession();
   const requestId = randomUUID();
   const startTime = Date.now();
-  
+
   if (!session.isLoggedIn || !session.username) {
     return { success: false, error: 'server-error' };
   }
@@ -124,7 +130,7 @@ export async function searchPatientByPhone(
   }
 
   const fullPhone = `${validation.data.countryCode}1${validation.data.phoneNumber}`;
-  
+
   try {
     const response = await fetch(SEARCH_WEBHOOK_URL, {
       method: 'POST',
@@ -132,16 +138,18 @@ export async function searchPatientByPhone(
       body: JSON.stringify({
         requestId: requestId,
         phone: fullPhone,
+        countryCode: validation.data.countryCode,
+        phoneNumber: validation.data.phoneNumber,
       }),
       cache: 'no-store'
     });
 
     if (!response.ok) {
-        return { success: false, error: 'server-error' };
+      return { success: false, error: 'server-error' };
     }
 
     const responseData = await response.json();
-    
+
     // The response is an array of objects, we take the first one.
     const data = Array.isArray(responseData) ? responseData[0] : responseData;
 
@@ -151,6 +159,8 @@ export async function searchPatientByPhone(
 
     const normalizedData: PatientData = {
       phone: data.Telefono || fullPhone,
+      countryCode: validation.data.countryCode,
+      phoneNumber: validation.data.phoneNumber,
       appointments: data.Citas.map((cita: any) => ({
         appointmentId: cita.Id,
         patientName: cita.Nombre || 'N/A',
@@ -206,9 +216,9 @@ export async function cancelAppointment(
     });
 
     if (!response.ok) {
-        return { success: false, error: 'server-error' };
+      return { success: false, error: 'server-error' };
     }
-    
+
     return { success: true };
 
   } catch (e) {
@@ -221,7 +231,7 @@ export async function rescheduleAppointment(
 ): Promise<RescheduleResult> {
   const session = await getSession();
   const requestId = randomUUID();
-  
+
   if (!session.isLoggedIn || !session.username) {
     return { success: false, message: 'Authentication required' };
   }
@@ -234,20 +244,20 @@ export async function rescheduleAppointment(
   if (!isRescheduleAllowed) {
     return { success: false, message: 'Too many requests. Please try again later.' };
   }
-  
+
   const validation = rescheduleAppointmentSchema.safeParse(appointmentData);
 
   if (!validation.success) {
     const errorMessage = "Invalid input data.";
     return { success: false, message: `${errorMessage} Details: ${JSON.stringify(validation.error.flatten())}` };
   }
-  
+
   try {
     const payload = {
-        requestId,
-        ...validation.data
+      requestId,
+      ...validation.data
     };
-    
+
     const response = await fetch(RESCHEDULE_WEBHOOK_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -256,14 +266,14 @@ export async function rescheduleAppointment(
     });
 
     if (!response.ok) {
-        let errorBody = await response.text();
-        try {
-            const jsonError = JSON.parse(errorBody);
-            errorBody = jsonError.message || errorBody;
-        } catch (e) {
-            // Not a JSON response
-        }
-        return { success: false, message: `Error ${response.status}: ${errorBody}` };
+      let errorBody = await response.text();
+      try {
+        const jsonError = JSON.parse(errorBody);
+        errorBody = jsonError.message || errorBody;
+      } catch (e) {
+        // Not a JSON response
+      }
+      return { success: false, message: `Error ${response.status}: ${errorBody}` };
     }
 
     // Handle 204 No Content or empty bodies as success
@@ -272,11 +282,11 @@ export async function rescheduleAppointment(
     }
 
     const result = await response.json().catch(() => ({}));
-    
+
     return { success: true, data: { newCalendarId: result?.CalendarID } };
 
   } catch (e) {
     return { success: false, message: 'An unexpected error occurred.' };
   }
 }
-    
+

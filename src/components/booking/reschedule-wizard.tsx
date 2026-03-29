@@ -19,22 +19,26 @@ import { format, parse, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useToast } from '@/hooks/use-toast';
 import { rescheduleAppointment } from '@/app/patients/search/actions';
+import { getAvailableTimes } from '@/app/booking-actions';
 
 interface RescheduleWizardProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   appointment: Appointment;
+
   phone: string;
+  countryCode?: string;
+  phoneNumber?: string;
   onRescheduleSuccess: (appointmentId: number, newDate: string, newCalendarId: string | undefined) => void;
 }
 
 function getOffsetFromISOString(dateString: string): string {
-    const match = dateString.match(/([+-]\d{2}:\d{2})$/);
-    if (match) {
-        return match[1];
-    }
-    // Default to Mexico City if no offset is found
-    return '-06:00';
+  const match = dateString.match(/([+-]\d{2}:\d{2})$/);
+  if (match) {
+    return match[1];
+  }
+  // Default to Mexico City if no offset is found
+  return '-06:00';
 }
 
 
@@ -42,7 +46,10 @@ export function RescheduleWizard({
   isOpen,
   onOpenChange,
   appointment,
+
   phone,
+  countryCode,
+  phoneNumber,
   onRescheduleSuccess,
 }: RescheduleWizardProps) {
   const { t, language } = useTranslation();
@@ -59,7 +66,7 @@ export function RescheduleWizard({
   const nextStep = () => setStep((prev) => prev + 1);
   const prevStep = () => setStep((prev) => prev - 1);
 
-  const N8N_AVAILABLE_TIMES_WEBHOOK_URL = process.env.NEXT_PUBLIC_N8N_AVAILABLE_TIMES_WEBHOOK_URL;
+
 
   const handleFetchTimes = async () => {
     if (!selectedDate) return;
@@ -67,39 +74,33 @@ export function RescheduleWizard({
     setSelectedTime(null);
     setAvailableTimes([]);
 
-    if (!N8N_AVAILABLE_TIMES_WEBHOOK_URL) {
-      toast({ variant: 'destructive', title: t('errorTitle'), description: 'Configuration error: Webhook URL is not set.' });
-      setIsFetchingTimes(false);
-      return;
-    }
+
 
     try {
-      const response = await fetch(N8N_AVAILABLE_TIMES_WEBHOOK_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          doctor_id: Number(appointment.doctorId),
-          Fecha: format(selectedDate, 'yyyy-MM-dd'),
-        }),
+      const result = await getAvailableTimes({
+        doctor_id: Number(appointment.doctorId),
+        date: format(selectedDate, 'yyyy-MM-dd'),
       });
 
-      if (!response.ok) throw new Error('Server responded with an error.');
-      
-      const responseData = await response.json();
+      if (!result.success) {
+        throw new Error(result.error || 'Server responded with an error.');
+      }
+
+      const responseData = result.data;
       const rawHours = responseData?.hours || [];
       const hours = rawHours.filter((h: unknown): h is string => typeof h === 'string').sort((a: string, b: string) => a.localeCompare(b));
-      
+
       if (hours.length === 0) {
         toast({ variant: 'destructive', title: t('noTimeSlotsTitle'), description: t('noTimeSlotsDescription') });
       } else {
-          const formattedTimes = hours.map((hourString: string) => {
-            const [hour, minute] = hourString.split(':');
-            const d = new Date();
-            d.setHours(parseInt(hour, 10), parseInt(minute, 10), 0, 0);
-            return format(d, 'p');
-          });
-          setAvailableTimes(formattedTimes);
-          nextStep();
+        const formattedTimes = hours.map((hourString: string) => {
+          const [hour, minute] = hourString.split(':');
+          const d = new Date();
+          d.setHours(parseInt(hour, 10), parseInt(minute, 10), 0, 0);
+          return format(d, 'p');
+        });
+        setAvailableTimes(formattedTimes);
+        nextStep();
       }
     } catch (error) {
       toast({ variant: 'destructive', title: t('errorTitle'), description: t('errorDescription') });
@@ -118,17 +119,20 @@ export function RescheduleWizard({
 
     startRescheduleTransition(async () => {
       const timeDate = parse(selectedTime, 'p', new Date());
-      
+
       const newDateWithTime = new Date(selectedDate);
       newDateWithTime.setHours(timeDate.getHours(), timeDate.getMinutes(), 0, 0);
-      
+
       const offset = getOffsetFromISOString(appointment.start);
       const dateForBackend = format(newDateWithTime, "yyyy-MM-dd'T'HH:mm:ss") + offset;
 
       const payload = {
         CalendarID: appointment.calendarId,
         FechaCitaCancelar: appointment.start,
+
         TelefonoUsuario: phone,
+        CountryCode: countryCode,
+        PhoneNumber: phoneNumber,
         ID_Doctor: Number(appointment.doctorId),
         NombrePaciente: appointment.patientName,
         MotivoCita: appointment.motive || null,
@@ -138,7 +142,7 @@ export function RescheduleWizard({
       const result = await rescheduleAppointment(payload);
 
       if (result.success) {
-        toast({ title: t('toast.reschedule.success')});
+        toast({ title: t('toast.reschedule.success') });
         const newDateForUI = dateForBackend;
         onRescheduleSuccess(appointment.appointmentId, newDateForUI, result.data?.newCalendarId);
       } else {
@@ -174,12 +178,12 @@ export function RescheduleWizard({
             </div>
             <DialogFooter>
               <Button
-                  onClick={handleFetchTimes}
-                  disabled={!selectedDate || isFetchingTimes}
-                  className="w-full btn-gradient"
+                onClick={handleFetchTimes}
+                disabled={!selectedDate || isFetchingTimes}
+                className="w-full btn-gradient"
               >
-                  {isFetchingTimes ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ArrowRight className="mr-2 h-4 w-4" />}
-                  {t('continueButton')}
+                {isFetchingTimes ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ArrowRight className="mr-2 h-4 w-4" />}
+                {t('continueButton')}
               </Button>
             </DialogFooter>
           </>
@@ -214,7 +218,7 @@ export function RescheduleWizard({
             <DialogHeader>
               <DialogTitle>{t('reschedule.step3.title')}</DialogTitle>
               <DialogDescription>
-                  Confirma los detalles para reagendar la cita de <strong>{appointment.patientName}</strong> ({phone}).
+                Confirma los detalles para reagendar la cita de <strong>{appointment.patientName}</strong> ({phone}).
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
@@ -229,14 +233,14 @@ export function RescheduleWizard({
               </div>
             </div>
             <DialogFooter>
-                <Button variant="outline" onClick={prevStep} disabled={isSubmitting}>
-                    <ArrowLeft className="mr-2 h-4 w-4" />
-                    {t('backButton')}
-                </Button>
-                <Button onClick={handleConfirmReschedule} disabled={!selectedDate || !selectedTime || isSubmitting} className="btn-gradient">
-                    {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    {t('reschedule.confirm')}
-                </Button>
+              <Button variant="outline" onClick={prevStep} disabled={isSubmitting}>
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                {t('backButton')}
+              </Button>
+              <Button onClick={handleConfirmReschedule} disabled={!selectedDate || !selectedTime || isSubmitting} className="btn-gradient">
+                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {t('reschedule.confirm')}
+              </Button>
             </DialogFooter>
           </>
         );

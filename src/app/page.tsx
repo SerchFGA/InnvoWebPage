@@ -15,6 +15,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useTranslation } from '@/contexts/language-context';
 import { ProgressIndicator } from '@/components/layout/progress-indicator';
 import { useAuth } from '@/contexts/auth-context';
+import { getAvailableTimes } from './booking-actions';
 
 export type Doctor = z.infer<typeof doctorSchema>;
 export type PatientDetails = z.infer<ReturnType<typeof patientDetailsSchema>>;
@@ -49,7 +50,7 @@ export default function Home() {
       router.push('/login');
     }
   }, [user, router]);
-  
+
   const N8N_AVAILABLE_TIMES_WEBHOOK_URL = process.env.NEXT_PUBLIC_N8N_AVAILABLE_TIMES_WEBHOOK_URL;
 
   const nextStep = () => setStep((prev) => prev + 1);
@@ -57,44 +58,28 @@ export default function Home() {
 
   const handleStep1Submit = async (data: { doctor: Doctor; date: Date }) => {
     setIsStep1Submitting(true);
-    
-    const N8N_WEBHOOK_URL = process.env.NEXT_PUBLIC_N8N_AVAILABLE_TIMES_WEBHOOK_URL;
-    if (!N8N_WEBHOOK_URL) {
-      toast({
-        variant: "destructive",
-        title: t('errorTitle'),
-        description: "Configuration error: Webhook URL is not set.",
-      });
-      setIsStep1Submitting(false);
-      return;
-    }
-    
+
     try {
-      const payload = {
-        doctor: data.doctor.name,
+      // Use Server Action to avoid CORS and hide webhook URL
+      const result = await getAvailableTimes({
+        doctor_name: data.doctor.name,
         doctor_id: data.doctor.id,
-        Fecha: format(data.date, 'yyyy-MM-dd'),
-      };
-
-      const response = await fetch(N8N_WEBHOOK_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        date: format(data.date, 'yyyy-MM-dd'),
       });
 
-      if (!response.ok) {
-        throw new Error('Server responded with an error.');
+      if (!result.success) {
+        throw new Error(result.error || 'Server responded with an error.');
       }
 
-      const responseData = await response.json();
-      
+      const responseData = result.data;
+
       const rawHours = responseData?.hours || [];
 
       // Ensure hours are strings and sort them
       const hours = rawHours
         .filter((h: unknown): h is string => typeof h === 'string')
         .sort((a: string, b: string) => a.localeCompare(b));
-      
+
       if (hours.length === 0) {
         toast({
           variant: 'destructive',
@@ -104,7 +89,7 @@ export default function Home() {
         setIsStep1Submitting(false);
         return;
       }
-      
+
       // Format hours from "13:00" to "1:00 PM"
       const availableTimes = hours.map((hourString: string) => {
         const [hour, minute] = hourString.split(':');
@@ -112,16 +97,17 @@ export default function Home() {
         d.setHours(parseInt(hour, 10), parseInt(minute, 10), 0, 0);
         return format(d, 'p'); // 'p' formats to locale-specific time like "1:00 PM"
       });
-      
-      setBookingData((prev) => ({ 
-        ...prev, 
-        doctor: data.doctor, 
-        date: data.date, 
-        availableTimes 
+
+      setBookingData((prev) => ({
+        ...prev,
+        doctor: data.doctor,
+        date: data.date,
+        availableTimes
       }));
       nextStep();
 
     } catch (error) {
+      console.error(error);
       toast({
         variant: "destructive",
         title: t('errorTitle'),
@@ -146,7 +132,7 @@ export default function Home() {
     setBookingData(initialBookingData);
     setStep(1);
   };
-  
+
   // Render a loading state or null while checking for auth and redirecting
   if (!user.isLoggedIn) {
     return (
@@ -160,7 +146,7 @@ export default function Home() {
     <div className="flex flex-col items-center justify-center p-4 sm:p-6 md:p-8">
       <div className="w-full max-w-4xl">
         <ProgressIndicator currentStep={step} />
-        
+
         <div className="mt-8">
           {step === 1 && <Step1SelectDoctorAndDate onNext={handleStep1Submit} data={bookingData} isSubmitting={isStep1Submitting} />}
           {step === 2 && <Step2SelectTime onNext={handleStep2Submit} onBack={prevStep} data={bookingData} />}
