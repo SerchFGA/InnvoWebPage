@@ -83,6 +83,18 @@
         "height": 80,
         "aiHint": "physical therapy"
       }
+    },
+    {
+      "id": 27,
+      "name": "ENTREGA PLANTILLAS",
+      "services": "ENTREGA DE PLANTILLAS",
+      "duration": "30 min session",
+      "image": {
+        "src": "/assets/RevisionesPodImage.webp",
+        "width": 80,
+        "height": 80,
+        "aiHint": "plantillas delivery"
+      }
     }
   ]
 }
